@@ -1,6 +1,7 @@
 <?xml version="1.0"?>
 <!DOCTYPE avg SYSTEM "../../doc/avg.dtd">
-<avg width="1024" height="1536" onkeyup="onKeyUp()">
+<avg width="1024" height="1536" onkeyup="onKeyUp()"
+      onmousedown="onMouseDown()" onmouseup="onMouseUp()">
   <div id="topscreen" x="0" y="0">
     <div id="top_background" x="0" y="0" z="1">
       <image x="0" y="0" z="0" href="medien/screen_background.tif"/>
@@ -125,8 +126,7 @@
           href="medien/rahmen_5x4.tif"/>
     </div>
   </div>
-  <div id="auflage" x="0" y="768" 
-      onmousedown="onMouseDown()" onmouseup="onMouseUp()">
+  <div id="auflage" x="0" y="768">
     <image id="auflage_background" x="0" y="0" z="0" 
             href="medien/auflage_background.tif"/>
     <words x="797" y="10" z="4" size="28" font="ceva"

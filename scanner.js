@@ -1,7 +1,10 @@
 var Log = new Logger;
 Log.setCategories(Log.LOG_PROFILE | 
                   Log.LOG_WARNING | 
+                  Log.LOG_EVENTS |
+                  Log.LOG_EVENTS2 |
                   Log.LOG_CONFIG);
+Log.setDestination("/var/log/cleuse.log");
 
 useModule("player");
 var AVGPlayer = new Player;
