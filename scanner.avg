@@ -1,0 +1,181 @@
+<?xml version="1.0"?>
+<!DOCTYPE avg SYSTEM "../../doc/avg.dtd">
+<avg width="1024" height="1536" onkeyup="onKeyUp()">
+  <div id="topscreen" x="0" y="0">
+    <div id="top_background" x="0" y="0" z="1">
+      <image x="0" y="0" z="0" href="medien/screen_background.tif"/>
+      <words x="797" y="736" z="1" size="28" font="ceva"
+          color="8E8E8E" text="genotype"/>
+      <words x="903" y="736" z="1" size="28" font="ceva"
+          text="explorer"/>
+    </div>
+    <div id="warten" x="178" y="241" z="4">
+      <image id="warten_aussen" x="0" y="0" z="1" 
+          href="medien/warten_aussen.tif"/>
+      <image id="warten_innen" x="32" y="31" z="1" 
+          href="medien/warten_innen.tif"/>
+    </div>
+    <div id="aufforderung_top" z="1" opacity="0">
+<!--      <image id="aufforderung_icon" x="455" y="279"
+          href="medien/02_aufforderung_handscan/scan_icon.tif"/>
+-->          
+    </div>
+    <div id="screens" x="36" y="58" z="0" opacity="1">
+        <image id="start_scan_aufblitzen" opacity="0"
+            href="medien/03_handscan/start_scan_aufblitzen.tif"/>
+        <image id="hand0" href="medien/03_handscan/hand0.tif" opacity="0"/>
+        <image id="hand1" href="medien/03_handscan/hand1.tif" opacity="0"/>
+        <image id="hand2" href="medien/03_handscan/hand2.tif" opacity="0"/>
+        <image id="hand3" href="medien/03_handscan/hand3.tif" opacity="0"/>
+        <image id="hand4" href="medien/03_handscan/hand4.tif" opacity="0"/>
+        <image id="hand5" href="medien/03_handscan/hand5.tif" opacity="0"/>
+        <image id="hand6" href="medien/03_handscan/hand6.tif" opacity="0"/>
+        <image id="hand7" href="medien/03_handscan/hand7.tif" opacity="0"/>
+        <image id="hand8" href="medien/03_handscan/hand8.tif" opacity="0"/>
+        <image id="hand9" href="medien/03_handscan/hand9.tif" opacity="0"/>
+        <image id="hand10" href="medien/03_handscan/hand10.tif" opacity="0"/>
+        <image id="hand11" href="medien/03_handscan/hand11.tif" opacity="0"/>
+        <image id="hand12" href="medien/03_handscan/hand12.tif" opacity="0"/>
+        <image id="hand13" href="medien/03_handscan/hand13.tif" opacity="0"/>
+        <image id="hand14" href="medien/03_handscan/hand14.tif" opacity="0"/>
+        <video id="handscanvideo" href="medien/03_handscan/hand_pulse.mpg" 
+                z="2" opacity="0"/>
+        <image id="green_screen" opacity="0" width="480" height="640"
+                href="medien/05_handscan_erkannt/green_screen.tif"/>
+    </div>
+    <image id="willkommen_text" x="607" y="675" width="330" height="13"
+        z="3" opacity="0"
+        href="medien/05_handscan_erkannt/willkommen.tif"/>
+    <image id="balken_ueberschriften" x="514" y="77" z="2" opacity="0"
+        href="medien/balken_ueberschriften.tif"/>
+    <div id="top_textlines" x="671" y="78" z="3" opacity="1">
+        <words id="line0" x="0" y="0" size="18" font="Arial"
+            text=""/>
+        <words id="line1" x="0" y="21" size="18" font="Arial"
+            text=""/>
+        <words id="line2" x="0" y="42" size="18" font="Arial"
+            text=""/>
+        <words id="line3" x="0" y="63" size="18" font="Arial"
+            text=""/>
+        <words id="line4" x="0" y="84" size="18" font="Arial"
+            text=""/>
+        <words id="line5" x="0" y="105" size="18" font="Arial"
+            text=""/>
+        <words id="line6" x="0" y="126" size="18" font="Arial"
+            text=""/>
+        <words id="line7" x="0" y="147" size="18" font="Arial"
+            text=""/>
+        <words id="line8" x="0" y="168" size="18" font="Arial"
+            text=""/>
+        <words id="line9" x="0" y="189" size="18" font="Arial"
+            text=""/>
+        <words id="line10" x="0" y="210" size="18" font="Arial"
+            text=""/>
+        <words id="line11" x="0" y="231" size="18" font="Arial"
+            text=""/>
+        <words id="line12" x="0" y="252" size="18" font="Arial"
+            text=""/>
+        <words id="line13" x="0" y="273" size="18" font="Arial"
+            text=""/>
+        <words id="line14" x="0" y="294" size="18" font="Arial"
+            text=""/>
+        <words id="line15" x="0" y="315" size="18" font="Arial"
+            text=""/>
+        <words id="line16" x="0" y="336" size="18" font="Arial"
+            text=""/>
+        <words id="line17" x="0" y="357" size="18" font="Arial"
+            text=""/>
+        <words id="line18" x="0" y="378" size="18" font="Arial"
+            text=""/>
+        <words id="line19" x="0" y="399" size="18" font="Arial"
+            text=""/>
+        <words id="line20" x="0" y="420" size="18" font="Arial"
+            text=""/>
+        <words id="line21" x="0" y="441" size="18" font="Arial"
+            text=""/>
+        <words id="line22" x="0" y="462" size="18" font="Arial"
+            text=""/>
+        <words id="line23" x="0" y="483" size="18" font="Arial"
+            text=""/>
+        <words id="line24" x="0" y="504" size="18" font="Arial"
+            text=""/>
+        <words id="line25" x="0" y="525" size="18" font="Arial"
+            text=""/>
+        <words id="line26" x="0" y="546" size="18" font="Arial"
+            text=""/>
+        <words id="line27" x="0" y="567" size="18" font="Arial"
+            text=""/>
+        <words id="line28" x="0" y="588" size="18" font="Arial"
+            text=""/>
+        <words id="line29" x="0" y="609" size="18" font="Arial"
+            text=""/>
+    </div>
+    <div id="data_icons" x="541" z="4">
+      <image id="molekuel" x="0" z="1" opacity="0"
+          href="medien/03_handscan/molekuel.tif"/>
+      <image id="helix" x="42" z="1" opacity="0"
+          href="medien/03_handscan/helix.tif"/>
+      <image id="welt" x="0" z="1" opacity="0"
+          href="medien/03_handscan/welt.tif"/>
+      <image id="rahmen_3x5" x="42" opacity="0"
+          href="medien/rahmen_3x5.tif"/>
+      <image id="rahmen_5x3" x="0" opacity="0"
+          href="medien/rahmen_5x3.tif"/>
+      <image id="rahmen_5x4" x="0" opacity="0"
+          href="medien/rahmen_5x4.tif"/>
+    </div>
+  </div>
+  <div id="auflage" x="0" y="768" 
+      onmousedown="onMouseDown()" onmouseup="onMouseUp()">
+    <image id="auflage_background" x="0" y="0" z="0" 
+            href="medien/auflage_background.tif"/>
+    <words x="797" y="10" z="4" size="28" font="ceva"
+        color="8E8E8E" text="genotype"/>
+    <words x="903" y="10" z="4" size="28" font="ceva"
+        text="explorer"/>
+    <div id="idle" x="0" y="0" z="2">
+      <image id="idle0" x="457" y="484" angle="0"
+          href="medien/pfeil.tif"/>
+      <image id="idle1" x="457" y="484" pivotx="55" pivoty="-100"
+          angle="0.52360" href="medien/pfeil.tif"/>
+      <image id="idle2" x="457" y="484" pivotx="55" pivoty="-100"
+          angle="1.04719" href="medien/pfeil.tif"/>
+      <image id="idle3" x="457" y="484" pivotx="55" pivoty="-100"
+          angle="1.57080" href="medien/pfeil.tif"/>
+      <image id="idle4" x="457" y="484" pivotx="55" pivoty="-100"
+          angle="2.09440" href="medien/pfeil.tif"/>
+      <image id="idle5" x="457" y="484" pivotx="55" pivoty="-100"
+          angle="2.61800" href="medien/pfeil.tif"/>
+      <image id="idle6" x="457" y="484" pivotx="55" pivoty="-100"
+          angle="3.14159" href="medien/pfeil.tif"/>
+      <image id="idle7" x="457" y="484" pivotx="55" pivoty="-100"
+          angle="3.66519" href="medien/pfeil.tif"/>
+      <image id="idle8" x="457" y="484" pivotx="55" pivoty="-100"
+          angle="4.18879" href="medien/pfeil.tif"/>
+      <image id="idle9" x="457" y="484" pivotx="55" pivoty="-100"
+          angle="4.71238" href="medien/pfeil.tif"/>
+      <image id="idle10" x="457" y="484" pivotx="55" pivoty="-100"
+          angle="5.23599" href="medien/pfeil.tif"/>
+      <image id="idle11" x="457" y="484" pivotx="55" pivoty="-100"
+          angle="5.75959" href="medien/pfeil.tif"/>
+    </div>
+    <div id="aufforderung_bottom" x="72" y="333" z="2" opacity="0">
+      <image href="medien/02_aufforderung_handscan/lila_hintergrund.tif"/>
+      <words x="80" y="30" z="1" size="24" font="Eurostile" weight="bold"
+          text="bitte identifizieren sie sich am scannermodul"/>
+        
+    </div>
+    <div id="scanning_bottom" y="600" z="2" opacity="0">
+      <video id="handscan_balken_links" x="0" y="0" loop="true" 
+          href="medien/03_handscan/scanbalken.mpg"/>
+      <video id="handscan_balken_rechts" x="720" y="0" loop="true"
+          href="medien/03_handscan/scanbalken.mpg"/>
+    </div>
+    <div id="pulse_bottom" x="238" y="18" z="3"> 
+      <image id="auflage_lila" opacity="0"
+          href="medien/03_handscan/auflage_lila.tif"/>
+      <image id="auflage_gruen" opacity="0"
+          href="medien/05_handscan_erkannt/auflage_gruen.tif"/>
+    </div>
+  </div>
+</avg>

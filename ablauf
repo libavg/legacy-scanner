@@ -1,0 +1,17 @@
+Zustände:
+
+- Idle: Oben Aufforderung 'Bitte Tastorgan auf das Scannermodul legen'
+- Scanvorgang: Scan ('Bitte stehenbleiben'), dann Vergleich mit Tastorganen
+- Erkennen: 'Als Humanoid erkannt'
+- Bodyscan: 'Daten unzureichend. Körperscan wird benötigt ;-)'
+...'Bitte weitergehen'...
+
+- Anzahl Scanvorgänge
+- Als Alien identifizieren, Alarm,
+- 'Vorgang unerwartet abgebrochen'...
+- Scan über Schrittmotor->Relais->ParPort. Holger will bauen.
+- Kamerabild baut sich parallel zu Scan auf.
+- Multilingual?
+- Licht: Unten, in Scheiben daneben, Alarm.
+- Auflösung?!
+
