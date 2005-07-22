@@ -8,14 +8,14 @@ def animationStep(nodeName, attrName, startValue, endValue,
     node = g_Player.getElementByID(nodeName)
     if (curTime < duration): 
         curValue = startValue+(endValue-startValue)*curTime/duration
-        node[attrName] = curValue
+        setattr(node, attrName, curValue)
         g_Player.setTimeout(30,
                 lambda: animationStep(nodeName, attrName, startValue,
                         endValue, duration, (curTime+30)))
     else:
-        node[attrName]=endValue
+        setattr(node, attrName, endValue)
 
-def animateAttr(nodeName, attrName, startValue, endValue, duration):
+def animateAttr(Player, nodeName, attrName, startValue, endValue, duration):
     global g_Player
     g_Player = Player
     animationStep(nodeName, attrName, startValue, endValue, duration, 30)

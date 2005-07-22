@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-import sys, os
+import sys, os, math, random
 sys.path.append('/usr/local/lib/python2.3/site-packages/avg')
 import avg
 import anim
@@ -56,6 +56,13 @@ class BottomRotator:
             if (self.CurIdleTriangle == 12):
                 self.CurIdleTriangle = 0
 
+class TextElement:
+    def __init__(self, Title, ImageID, RahmenID, Text):
+        self.Title = Title
+        self.ImageID = ImageID
+        self.RahmenID = RahmenID
+        self.Text = Text
+
 def clearText(): 
     for i in range(30):
         node = Player.getElementByID("line"+str(i))
@@ -67,7 +74,7 @@ def clearText():
         node.y=i*21
 
 def setTextLine (Line, Text, Font, Size, Color):
-    CurTextNode = Player.getElementByID("line"+Line)
+    CurTextNode = Player.getElementByID("line"+str(Line))
     CurTextNode.text = Text
     CurTextNode.font = Font
     CurTextNode.size = Size
@@ -76,11 +83,11 @@ def setTextLine (Line, Text, Font, Size, Color):
 def calcTextPositions (TextElements, TitleColor, TextColor): 
     CurLine = 5
     for CurElem in TextElements:
-        setTextLine(CurLine, CurElem.title, "Eurostile", 18, TitleColor)
-        Player.getElementByID("line"+CurLine).y -= 5
+        setTextLine(CurLine, CurElem.Title, "Eurostile", 18, TitleColor)
+        Player.getElementByID("line"+str(CurLine)).y -= 5
         CurLine += 1
-        for j in range(CurElem.numLines):
-            setTextLine(CurLine, "CurElem.text"+str(j), "Arial", 15, 
+        for CurText in CurElem.Text:
+            setTextLine(CurLine, CurText, "Arial", 15, 
                     TextColor)
             CurLine += 1
         CurLine += 2
@@ -98,7 +105,7 @@ class UnbenutztMover:
         Player.getElementByID("idle").opacity = 1
         Player.getElementByID("auflage_background").opacity = 1
         clearText()
-        self.TimeoutID = Player.setTimeout(6000, 
+        self.TimeoutID = Player.setTimeout(60000, 
                 lambda : changeMover(Unbenutzt_AufforderungMover()))
         BottomRotator.CurIdleTriangle=0
         BottomRotator.TrianglePhase=0
@@ -193,39 +200,30 @@ class HandscanMover:
         global Status
         Status = HANDSCAN
         self.TextElements = [
-              { title:"moleculare structur", 
-                image:"molekuel",
-                rahmen:"rahmen_5x4",
-                numLines:4,
-                text0:"Electrische Felder &amp; Wellen",
-                text1:"Quantenanalyse",
-                text2:"Atomare Zusammensetzung",
-                text3:"Datensynthese" },
-              { title:"genetische transcription", 
-                image:"helix",
-                rahmen:"rahmen_3x5",
-                numLines:6,
-                text0:"Analyse der Alpha-Helix",
-                text1:"Arten der Pilzgattung Candida",
-                text2:"Mitochondrien",
-                text3:"> von Crosophila",
-                text4:"> höherer Pflanzen",
-                text5:"> von Säugern" },
-              { title:"lebensform &amp; hercunft",
-                image:"welt",
-                rahmen:"rahmen_5x3",
-                numLines:5,
-                text0:"Abgleich mit dem cosmolab",
-                text1:"> Welten der Sauerstoffatmer", 
-                text2:"> Verbotene Welten",
-                text3:"> Virtuelle Orte",
-                text4:"> Träume" }
+                TextElement("moleculare structur", "molekuel", "rahmen_5x4",
+                    [ "Electrische Felder &amp; Wellen",
+                      "Quantenanalyse",
+                      "Atomare Zusammensetzung",
+                      "Datensynthese"]),
+                TextElement("genetische transcription", "helix", "rahmen_3x5",
+                    [ "Analyse der Alpha-Helix",
+                      "Arten der Pilzgattung Candida",
+                      "Mitochondrien",
+                      "> von Crosophila",
+                      "> höherer Pflanzen",
+                      "> von Säugern"]),
+                TextElement("lebensform &amp; hercunft", "welt", "rahmen_5x3",
+                    [ "Abgleich mit dem cosmolab",
+                      "> Welten der Sauerstoffatmer", 
+                      "> Verbotene Welten",
+                      "> Virtuelle Orte",
+                      "> Träume"])
             ]
         self.bRotateAussen = 1
         self.bRotateInnen = 1
         self.START = 0
         self.SCANNING = 1
-        self.Phase = self.PHASE_START
+        self.Phase = self.START
         
         self.CurHand = 0
         self.ScanFrames = 0
@@ -236,16 +234,16 @@ class HandscanMover:
         anim.animateAttr(Player, "warten", "x", 178, 620, 600)
         anim.animateAttr(Player, "warten", "y", 241, 10, 600)
         for i in range(12):
-            fadeOut("idle"+str(i), 200)
+            anim.fadeOut(Player, "idle"+str(i), 200)
         self.ScanningBottomNode.y = 600
-        calcTextPositions(TextElements, "CDF1C8", "FFFFFF")
+        calcTextPositions(self.TextElements, "CDF1C8", "FFFFFF")
     
     def onFrame(self):
         if (self.Phase == self.START):
             if (self.bRotateAussen):
                 node = Player.getElementByID("warten_aussen") 
                 node.angle += 0.13
-                rotateAussenIdle()
+                TopRotator.rotateAussenIdle()
                 if (abs(node.angle) < 0.3): 
                     node.angle = 0
                     self.bRotateAussen = 0
@@ -253,76 +251,74 @@ class HandscanMover:
                 node = Player.getElementByID("warten_innen") 
                 node.angle -= 0.07
                 TopRotator.rotateInnenIdle()
-                if (Math.abs(node.angle) < 0.2):
+                if (abs(node.angle) < 0.2):
                     node.angle = 0
                     self.bRotateInnen = 0
             if (not self.bRotateInnen and not self.bRotateAussen):
-                fadeOut(Player, "warten", 400)
+                anim.fadeOut(Player, "warten", 400)
                 node = Player.getElementByID("line1")
                 node.text="scanning"
                 node.weight="bold"
-                fadeIn(Player, "line1", 1000, 1.0)
+                anim.fadeIn(Player, "line1", 1000, 1.0)
                 Player.getElementByID("line1").font="Eurostile"
-                fadeIn(Player, "balken_ueberschriften", 1000, 1.0)
-                Phase = PHASE_SCANNING
+                anim.fadeIn(Player, "balken_ueberschriften", 1000, 1.0)
+                self.Phase = self.SCANNING
         elif (self.Phase == self.SCANNING):    
             self.ScanFrames += 1
             if (self.ScanFrames > 72 and self.ScanFrames%6 == 0): 
-                Player.getElementByID("hand"+CurHand).opacity=0.0
-                self.CurHand = floor(random()*15)
-                Player.getElementByID("hand"+CurHand).opacity=1.0
+                Player.getElementByID("hand"+str(self.CurHand)).opacity=0.0
+                self.CurHand = int(math.floor(random.random()*15))
+                Player.getElementByID("hand"+str(self.CurHand)).opacity=1.0
             
             if (self.ScanFrames%8 == 0 and self.CurTextLine != -1 and 
                     self.CurTextLine < 30): 
-                Player.getElementByID("line"+CurTextLine).opacity=1.0
-                CurTextLine += 1
-            if (ScanFrames == 1):
+                Player.getElementByID("line"+str(self.CurTextLine)).opacity=1.0
+                self.CurTextLine += 1
+            if (self.ScanFrames == 1):
                 Player.getElementByID("start_scan_aufblitzen").opacity=1.0
                 playSound("bioscan.wav")
-                fadeIn("scanning_bottom", 200, 1.0)
-                fadeIn("auflage_lila", 200, 1.0)
+                anim.fadeIn(Player, "scanning_bottom", 200, 1.0)
+                anim.fadeIn(Player, "auflage_lila", 200, 1.0)
                 Player.getElementByID("handscan_balken_links").play()
                 Player.getElementByID("handscan_balken_rechts").play()
-                fadeOut("auflage_background", 200)
+                anim.fadeOut(Player, "auflage_background", 200)
 #                playSound("handscan.wav")
-            elif (ScanFrames == 6):
-                fadeOut("start_scan_aufblitzen", 100)
+            elif (self.ScanFrames == 6):
+                anim.fadeOut(Player, "start_scan_aufblitzen", 100)
                 node = Player.getElementByID("handscanvideo")
                 node.opacity=1.0
                 node.play()
-            elif (ScanFrames == 15):
-                obj.startDataDisplay()
-            elif (ScanFrames == 72):
+            elif (self.ScanFrames == 15):
+                self.CurTextLine = 5
+            elif (self.ScanFrames == 72):
                 node = Player.getElementByID("handscanvideo")
                 node.stop()
-                fadeOut("handscanvideo", 600)
-            elif (ScanFrames == 200):
-                if (Math.random() > 0.5): 
+                anim.fadeOut(Player, "handscanvideo", 600)
+            elif (self.ScanFrames == 200):
+                if (random.random() > 0.5): 
                     changeMover(KoerperscanMover())
                 else:
                     changeMover(HandscanErkanntMover())
             self.ScanningBottomNode.y -= 3
     
     def onStop(self):
-        Player.getElementByID("hand"+CurHand).opacity=0.0
+        def setLine1Font():
+            Player.getElementByID("line1").font="Arial"
+        Player.getElementByID("hand"+str(self.CurHand)).opacity=0.0
         node = Player.getElementByID("handscanvideo")
         node.stop()
         node.opacity = 0
-        fadeOut(Player, "line1", 300)
-        Player.setTimeout(300, 
-            "Player.getElementByID(\"line1\").font=\"Arial\"")
-        fadeOut(Player, "balken_ueberschriften", 300)
-        fadeOut(Player, "warten", 300)
+        anim.fadeOut(Player, "line1", 300)
+        Player.setTimeout(300, setLine1Font) 
+        anim.fadeOut(Player, "balken_ueberschriften", 300)
+        anim.fadeOut(Player, "warten", 300)
         Player.getElementByID("scanning_bottom").opacity=0
         Player.getElementByID("handscan_balken_links").stop()
         Player.getElementByID("handscan_balken_rechts").stop()
-        fadeOut(Player, "auflage_lila", 300)
+        anim.fadeOut(Player, "auflage_lila", 300)
         clearText()
         Player.getElementByID("start_scan_aufblitzen").opacity = 0
         Player.getElementByID("balken_ueberschriften").opacity = 0
-    
-    def startDataDisplay(self):
-        CurTextLine = 5
 
    
 class HandscanErkanntMover: 
@@ -332,18 +328,19 @@ class HandscanErkanntMover:
         self.WillkommenNode = Player.getElementByID("willkommen_text")
 
     def onStart(self):
-        def newMover(self):
+        def newMover():
+            global bMouseDown
             if (bMouseDown):
                 changeMover(WeitergehenMover())
             else:
                 changeMover(UnbenutztMover())
-        fadeIn(Player, "willkommen_text", 500, 1)
-        fadeIn(Player, "green_screen", 500, 1)
-        animateAttr(Player, "willkommen_text", "x", 607, 73, 1000)
-        animateAttr(Player, "willkommen_text", "y", 675, 81, 1000)
-        animateAttr(Player, "willkommen_text", "width", 330, 874, 1000)
-        animateAttr(Player, "willkommen_text", "height", 13, 37, 1000)
-        fadeIn(Player, "auflage_gruen", 500, 1)
+        anim.fadeIn(Player, "willkommen_text", 500, 1)
+        anim.fadeIn(Player, "green_screen", 500, 1)
+        anim.animateAttr(Player, "willkommen_text", "x", 607, 73, 1000)
+        anim.animateAttr(Player, "willkommen_text", "y", 675, 81, 1000)
+        anim.animateAttr(Player, "willkommen_text", "width", 330, 874, 1000)
+        anim.animateAttr(Player, "willkommen_text", "height", 13, 37, 1000)
+        anim.fadeIn(Player, "auflage_gruen", 500, 1)
         playSound("willkomm.wav")
         self.StopTimeoutID = Player.setTimeout(4000, 
                 newMover)
@@ -353,9 +350,9 @@ class HandscanErkanntMover:
 
     def onStop(self):
         Player.clearInterval(self.StopTimeoutID)
-        fadeOut(Player, "willkommen_text", 500)
-        fadeOut(Player, "green_screen", 500)
-        fadeOut(Player, "auflage_gruen", 500)
+        anim.fadeOut(Player, "willkommen_text", 500)
+        anim.fadeOut(Player, "green_screen", 500)
+        anim.fadeOut(Player, "auflage_gruen", 500)
 
 
 class HandscanAbgebrochenMover:
@@ -363,20 +360,14 @@ class HandscanAbgebrochenMover:
         global Status
         Status = HANDSCAN_ABGEBROCHEN
         self.TextElements = [
-          { title:"vorgang abgebrochen", 
-            image:"warn_icon",
-            rahmen:"",
-            numLines:5,
-            text0:"Extremität zu früh entfernt",
-            text1:"> Alpha-Helix nicht ercannt",
-            text2:"> Unbecannte Macht",
-            text3:"> Lebensform unbecannt",
-            text4:"> Wiederholen, ignorieren, abbrechen?" },
-          { title:"nicht identifiziert",
-            image:"",
-            rahmen:"",
-            numLines:0 }
-        ]
+                TextElement("vorgang abgebrochen", "warn_icon", "",
+                    [ "Extremität zu früh entfernt",
+                      "> Alpha-Helix nicht ercannt",
+                      "> Unbecannte Macht",
+                      "> Lebensform unbecannt",
+                      "> Wiederholen, ignorieren, abbrechen?"]),
+                TextElement("nicht identifiziert", "", "", [])
+            ]
         self.CurFrame = 0
         self.CurTextLine = 4
         self.WartenNode = Player.getElementByID("warten")
@@ -393,7 +384,7 @@ class HandscanAbgebrochenMover:
     def onFrame(self): 
         if (self.CurFrame%6 == 0 and self.CurTextLine != -1 and
                 self.CurTextLine < 30):
-            Player.getElementByID("line"+self.CurTextLine).opacity=1.0
+            Player.getElementByID("line"+str(self.CurTextLine)).opacity=1.0
             self.CurTextLine += 1
         if (self.CurFrame == 45):
             playSound("nichtide.wav")  
@@ -408,35 +399,26 @@ class HandscanAbgebrochenMover:
 class KoerperscanMover:
     def __init__(self):
         global Status
-        Status = STATUS_KOERPERSCAN
-        TextElements = [
-              { title:"grundtonus", 
-                image:"",
-                rahmen:"",
-                numLines:6,
-                text0:"Topographie",
-                text1:"> Gliedmaße",
-                text2:"Topologie",
-                text3:"Scelettaufbau",
-                text4:"> Wirbelsäule",
-                text5:"Organe und Innereien" },
-              { title:"zellen",
-                image:"",
-                rahmen:"",
-                numLines:5,
-                text0:"Cerngrundbasisplasma",
-                text1:"Chromatin",
-                text2:"Ribosom",
-                text3:"Endoplasmatisches Reticulum",
-                text4:"Tunnelproteine" },
-              { title:"gehirn",
-                image:"",
-                rahmen:"",
-                numLines:4,
-                text0:"Thermaler PET scan",
-                text1:"> Cerebraler Cortex",
-                text2:"> Occipatalanalyse",
-                text3:"Intelligenzquotient" }
+        Status = KOERPERSCAN
+        self.TextElements = [
+            TextElement("grundtonus", "", "",
+                [ "Topographie",
+                  "> Gliedmaße",
+                  "Topologie",
+                  "Scelettaufbau",
+                  "> Wirbelsäule",
+                  "Organe und Innereien"]),
+            TextElement("zellen", "", "",
+                [ "Cerngrundbasisplasma",
+                  "Chromatin",
+                  "Ribosom",
+                  "Endoplasmatisches Reticulum",
+                  "Tunnelproteine"]),
+            TextElement("gehirn", "", "",
+                [ "Thermaler PET scan",
+                  "> Cerebraler Cortex",
+                  "> Occipatalanalyse",
+                  "Intelligenzquotient"])
             ]
         self.CurFrame = 0
         self.CurTextLine = 4
@@ -465,11 +447,8 @@ class WeitergehenMover:
     def __init__(self):
         global Status
         Status = WEITERGEHEN
-        TextElements = [
-              { title:"bitte weitergehen", 
-                image:"warn_icon",
-                rahmen:"",
-                numLines:0 }
+        self.TextElements = [
+              TextElement("bitte weitergehen", "warn_icon", "", [])
             ]
         self.CurFrame = 0
         self.CurTextLine = 4
@@ -481,11 +460,11 @@ class WeitergehenMover:
     def onFrame(self):
         BottomRotator.rotateBottom()
         if (self.CurFrame%6 == 0 and self.CurTextLine < 30): 
-            Player.getElementByID("line"+self.CurTextLine).opacity=1.0
+            Player.getElementByID("line"+str(self.CurTextLine)).opacity=1.0
             self.CurTextLine += 1
         if (self.CurFrame%100 == 0):
             playSound("weiterge.wav")
-        CurFrame += 1
+        self.CurFrame += 1
 
     def onStop(self):
         clearText()
@@ -499,16 +478,18 @@ def onKeyUp():
     # Handle photo sensor test code here
 
 def onMouseDown():
+    global bMouseDown
     bMouseDown = 1
     if (Status in [UNBENUTZT, UNBENUTZT_AUFFORDERUNG, AUFFORDERUNG]):
         changeMover(HandscanMover())
 
 def onMouseUp():
+    global bMouseDown
     bMouseDown = 0
     if (Status == HANDSCAN):
-        changeMover(HandscanAbgebrochenMover)
+        changeMover(HandscanAbgebrochenMover())
     elif (Status == WEITERGEHEN):
-        changeMover(UnbenutztMover)
+        changeMover(UnbenutztMover())
 
 
 
