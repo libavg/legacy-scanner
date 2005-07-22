@@ -9,7 +9,7 @@ import anim
 def playSound(Filename):
     id = os.fork()
     if (id == 0):
-        os.execl("bgsound.sh", Filename)
+        os.execl("/usr/bin/aplay", "aplay", "-MqN", "medien/cound/"+Filename)
         exit(0)
 
 def changeMover(NewMover):
