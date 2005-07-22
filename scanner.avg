@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <!DOCTYPE avg SYSTEM "../../doc/avg.dtd">
 <avg width="1024" height="1536" onkeyup="onKeyUp()"
-      onmousedown="onMouseDown()" onmouseup="onMouseUp()">
+      onmousedown="onMouseDown" onmouseup="onMouseUp">
   <div id="topscreen" x="0" y="0">
     <div id="top_background" x="0" y="0" z="1">
       <image x="0" y="0" z="0" href="medien/screen_background.tif"/>
