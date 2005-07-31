@@ -1,10 +1,14 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
-
+# TODO:
+#  - ctrl-c etc. schalten 220V aus.
+#  - icons.
+#  - rotator an unterschiedlichen Stellen.
 import sys, os, math, random
 sys.path.append('/usr/local/lib/python2.3/site-packages/avg')
 import avg
 import anim
+import time
 
 def playSound(Filename):
     id = os.fork()
@@ -17,6 +21,76 @@ def changeMover(NewMover):
     CurrentMover.onStop()
     CurrentMover = NewMover
     CurrentMover.onStart()
+
+class BodyScanner:
+    def __init__(self):
+        self.ParPort = avg.ParPort()
+        self.ParPort.init("")
+        self.bMotorOn = 0
+        self.bMotorDir = 0
+        if self.ParPort.getStatusLine(avg.STATUS_PAPEROUT):
+            Log.trace(Log.APP, 
+                    "Parallel conrad relais board not found. Disabling body scanner.")
+            self.bActive = 0
+        else:
+            Log.trace(Log.APP, 
+                    "Parallel conrad relais board found. Enabling body scanner.")
+            self.bActive = 1
+        self.lastMotorOnTime = time.time();
+        self.lastMotorDirTime = time.time();
+    def powerOn(self):
+        if self.bActive:
+            self.__setDataLine(avg.PARPORTDATA1, 1)
+            self.__setDataLine(avg.PARPORTDATA2, 1)
+    def powerOff(self):
+        if self.bActive:
+            self.__setDataLine(avg.PARPORTDATA1, 0)
+            self.__setDataLine(avg.PARPORTDATA2, 0)
+    def startScan(self):
+        if self.bActive:
+            self.__setDataLine(avg.PARPORTDATA0, 1)
+            Player.setTimeout(1000, lambda : self.__setDataLine(avg.PARPORTDATA0, 0)) 
+    def poll(self):
+        def printPPLine(line, name):
+            print name,
+            if self.ParPort.getStatusLine(line):
+                print ": off",
+            else:
+                print ":  on",
+        if self.bActive:
+            bMotorOn = self.ParPort.getStatusLine(avg.STATUS_ACK)
+            bMotorDir = self.ParPort.getStatusLine(avg.STATUS_BUSY)
+            if bMotorOn != self.bMotorOn:
+                if bMotorOn:
+                    Log.trace(Log.APP, "Body scanner motor on.")
+                else:
+                    Log.trace(Log.APP, "Body scanner motor off.")
+                if time.time() - self.lastMotorOnTime < 1:
+                    Log.trace(Log.WARNING, "Body scanner motor on bouncing?")
+                self.lastMotorOnTime = time.time();
+            if bMotorDir != self.bMotorDir:
+                if bMotorOn:
+                    Log.trace(Log.APP, "Body scanner moving up.")
+                else:
+                    Log.trace(Log.APP, "Body scanner moving down.")
+                if time.time() - self.lastMotorDirTime < 1:
+                    Log.trace(Log.WARNING, "Body scanner motor dir bouncing?")
+                    self.lastMotorDirTime = time.time();
+            self.bMotorOn = bMotorOn
+            self.bMotorDir = bMotorDir
+            printPPLine(avg.STATUS_ACK, "STATUS_ACK")
+            print ", ",
+            printPPLine(avg.STATUS_BUSY, "STATUS_BUSY") 
+            print
+    def __setDataLine(self, line, value):
+        self.ParPort.setControlLine(avg.CONTROL_STROBE, 0)
+        if value:
+            self.ParPort.setDataLines(line)
+        else:
+            self.ParPort.clearDataLines(line)
+        self.ParPort.setControlLine(avg.CONTROL_STROBE, 1)
+        time.sleep(0.001);
+        self.ParPort.setControlLine(avg.CONTROL_STROBE, 0 )
 
 class TopRotator:
     def rotateAussenIdle(self):
@@ -229,6 +303,9 @@ class HandscanMover:
         self.ScanFrames = 0
         self.CurTextLine = -1
         self.ScanningBottomNode = Player.getElementByID("scanning_bottom")
+        global Scanner
+        Scanner.powerOn()
+        Player.setInterval(200, Scanner.poll)
 
     def onStart(self): 
         anim.animateAttr(Player, "warten", "x", 178, 620, 600)
@@ -299,6 +376,8 @@ class HandscanMover:
                     changeMover(KoerperscanMover())
                 else:
                     changeMover(HandscanErkanntMover())
+                    global Scanner
+                    Scanner.powerOff()
             self.ScanningBottomNode.y -= 3
     
     def onStop(self):
@@ -422,6 +501,8 @@ class KoerperscanMover:
             ]
         self.CurFrame = 0
         self.CurTextLine = 4
+        global Scanner
+        Scanner.startScan()
 
     def onStart(self): 
         calcTextPositions(self.TextElements, "CDF1C8", "FFFFFF")
@@ -440,6 +521,9 @@ class KoerperscanMover:
         self.CurFrame += 1
 
     def onStop(self): 
+        print("onStop")
+        global Scanner
+        Scanner.powerOff()
         clearText()
 
 
@@ -487,6 +571,8 @@ def onMouseUp():
     global bMouseDown
     bMouseDown = 0
     if (Status == HANDSCAN):
+        global Scanner
+        Scanner.powerOff()
         changeMover(HandscanAbgebrochenMover())
     elif (Status == WEITERGEHEN):
         changeMover(UnbenutztMover())
@@ -495,27 +581,41 @@ def onMouseUp():
 
 Player = avg.Player()
 Log = avg.Logger.get()
-Log.setCategories(Log.APP |
-                  Log.WARNING | 
-                  Log.PROFILE |
-                  Log.PROFILE_LATEFRAMES |
-                  Log.CONFIG |
-#                  Log.MEMORY  |
-#                  Log.BLTS    |
-                  Log.EVENTS)
-#Log.setDestination("/var/log/cleuse.log")
 
 ConradRelais = avg.ConradRelais(Player, 0)
 
-UNBENUTZT, UNBENUTZT_AUFFORDERUNG, AUFFORDERUNG, HANDSCAN, HANDSCAN_ABGEBROCHEN, HANDSCAN_ERKANNT, AUFFORDERUNG_KOERPERSCAN, KOERPERSCAN, KOERPERSCAN_ERKANNT, WEITERGEHEN, ALARM = range(11)
+UNBENUTZT, UNBENUTZT_AUFFORDERUNG, AUFFORDERUNG, HANDSCAN, HANDSCAN_ABGEBROCHEN, \
+HANDSCAN_ERKANNT, AUFFORDERUNG_KOERPERSCAN, KOERPERSCAN, KOERPERSCAN_ERKANNT, \
+WEITERGEHEN, ALARM \
+= range(11)
 
-bDebug=1
+bDebug = not(os.getenv('CLEUSE_DEPLOY'))
 if (bDebug):
     Player.setResolution(0, 512, 0, 0) 
+    Log.setCategories(Log.APP |
+                      Log.WARNING | 
+                      Log.PROFILE |
+                      Log.PROFILE_LATEFRAMES |
+                      Log.CONFIG |
+#                      Log.MEMORY  |
+#                      Log.BLTS    |
+                      Log.EVENTS)
 else:
+    Player.setResolution(1, 0, 0, 0)
     Player.showCursor(0)
+    Log.setDestination("/var/log/cleuse.log")
+    Log.setCategories(Log.APP |
+                      Log.WARNING | 
+                      Log.PROFILE |
+                      Log.PROFILE_LATEFRAMES |
+                      Log.CONFIG |
+#                      Log.MEMORY  |
+#                      Log.BLTS    |
+                      Log.EVENTS)
 Player.loadFile("scanner.avg")
 Player.setInterval(10, onFrame)
+
+Scanner = BodyScanner() 
 
 TopRotator = TopRotator()
 BottomRotator = BottomRotator()
@@ -525,3 +625,5 @@ CurrentMover = UnbenutztMover()
 CurrentMover.onStart()
 
 Player.play(30)
+Scanner.powerOff()
+
