@@ -111,7 +111,7 @@
         <words id="line29" x="0" y="609" size="18" font="Arial"
             text=""/>
     </div>
-    <div id="data_icons" x="541" z="4">
+    <div id="data_icons" x="541" y="78" z="4">
       <image id="molekuel" x="0" z="1" opacity="0"
           href="medien/03_handscan/molekuel.tif"/>
       <image id="helix" x="42" z="1" opacity="0"

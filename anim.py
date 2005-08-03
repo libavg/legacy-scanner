@@ -23,10 +23,8 @@ def animateAttr(Player, nodeName, attrName, startValue, endValue, duration):
 def fadeStep(nodeName, change): 
     node = g_Player.getElementByID(nodeName)
     node.opacity += change
-#    print "fadeStep "+nodeName+":"+str(node.opacity)
 
 def fadeEnd(id, nodeName, val):
-#    print "fadeEnd "+nodeName+":"+str(val)
     node = g_Player.getElementByID(nodeName)
     node.opacity = val
     g_Player.clearInterval(id)

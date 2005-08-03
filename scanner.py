@@ -137,34 +137,71 @@ class TextElement:
         self.RahmenID = RahmenID
         self.Text = Text
 
-def clearText(): 
-    for i in range(30):
-        node = Player.getElementByID("line"+str(i))
-        node.opacity=0
-        node.size=18
-        node.font="Arial"
-        node.color="FFFFFF"
-        node.text=""
-        node.y=i*21
-
-def setTextLine (Line, Text, Font, Size, Color):
-    CurTextNode = Player.getElementByID("line"+str(Line))
-    CurTextNode.text = Text
-    CurTextNode.font = Font
-    CurTextNode.size = Size
-    CurTextNode.color = Color
-
-def calcTextPositions (TextElements, TitleColor, TextColor): 
-    CurLine = 5
-    for CurElem in TextElements:
-        setTextLine(CurLine, CurElem.Title, "Eurostile", 18, TitleColor)
-        Player.getElementByID("line"+str(CurLine)).y -= 5
-        CurLine += 1
-        for CurText in CurElem.Text:
-            setTextLine(CurLine, CurText, "Arial", 15, 
-                    TextColor)
+class MessageArea:
+    def __init__(self):
+        self.__ImageIDs = []
+        self.__TimeoutID = 0
+    def calcTextPositions (self, TextElements, TitleColor, TextColor):
+        def setTextLine(Line, Text, Font, Size, Color):
+            CurTextNode = Player.getElementByID("line"+str(Line))
+            CurTextNode.text = Text
+            CurTextNode.font = Font
+            CurTextNode.size = Size
+            CurTextNode.color = Color
+        self.__ImageIDs = []
+        CurLine = 5
+        for CurElem in TextElements:
+            setTextLine(CurLine, CurElem.Title, "Eurostile", 18, TitleColor)
+            Player.getElementByID("line"+str(CurLine)).y -= 5
+            self.__ImageIDs.append((CurLine, CurElem.RahmenID, CurElem.ImageID))
+            self.__CurImage = 0
             CurLine += 1
-        CurLine += 2
+            for CurText in CurElem.Text:
+                setTextLine(CurLine, CurText, "Arial", 15, 
+                        TextColor)
+                CurLine += 1
+            CurLine += 2
+        self.__CurLine = 5
+        if not(self.__ImageIDs == []):
+            self.__Phase = 0
+        else:
+            self.__Phase = 1
+            
+    def clear(self): 
+        for i in range(30):
+            node = Player.getElementByID("line"+str(i))
+            node.opacity=0
+            node.size=18
+            node.font="Arial"
+            node.color="FFFFFF"
+            node.text=""
+            node.y=i*21
+        for Image in self.__ImageIDs:
+            if not(Image[1] == ""):
+                Player.getElementByID(Image[1]).opacity = 0
+            if not(Image[2] == ""):
+                Player.getElementByID(Image[2]).opacity = 0
+        if self.__TimeoutID:
+            Player.clearInterval(self.__TimeoutID)
+
+    def showNextLine(self):
+        def showImage(Line, ID):
+            if not(ID == ""):
+                Image = Player.getElementByID(ID)
+                Image.opacity = 1
+                Image.y = Player.getElementByID("line"+str(Line)).y
+            self.__TimeoutID = 0
+        if self.__Phase == 0:
+            curImageID = self.__ImageIDs[self.__CurImage]
+            showImage(curImageID[0], curImageID[1])
+            self.__TimeoutID = Player.setTimeout(100, 
+                    lambda: showImage(curImageID[0], curImageID[2]))
+            self.__CurImage+=1
+            if self.__CurImage == len(self.__ImageIDs):
+                self.__Phase = 1
+        elif self.__CurLine < 30:
+            Player.getElementByID("line"+str(self.__CurLine)).opacity=1.0
+            self.__CurLine += 1
 
 class UnbenutztMover:
     def __init__(self):
@@ -178,7 +215,7 @@ class UnbenutztMover:
         self.WartenNode.y = 241
         Player.getElementByID("idle").opacity = 1
         Player.getElementByID("auflage_background").opacity = 1
-        clearText()
+        MessageArea.clear()
         self.TimeoutID = Player.setTimeout(60000, 
                 lambda : changeMover(Unbenutzt_AufforderungMover()))
         BottomRotator.CurIdleTriangle=0
@@ -301,7 +338,6 @@ class HandscanMover:
         
         self.CurHand = 0
         self.ScanFrames = 0
-        self.CurTextLine = -1
         self.ScanningBottomNode = Player.getElementByID("scanning_bottom")
         global Scanner
         Scanner.powerOn()
@@ -313,7 +349,7 @@ class HandscanMover:
         for i in range(12):
             anim.fadeOut(Player, "idle"+str(i), 200)
         self.ScanningBottomNode.y = 600
-        calcTextPositions(self.TextElements, "CDF1C8", "FFFFFF")
+        MessageArea.calcTextPositions(self.TextElements, "CDF1C8", "FFFFFF")
     
     def onFrame(self):
         if (self.Phase == self.START):
@@ -346,11 +382,9 @@ class HandscanMover:
                 Player.getElementByID("hand"+str(self.CurHand)).opacity=0.0
                 self.CurHand = int(math.floor(random.random()*15))
                 Player.getElementByID("hand"+str(self.CurHand)).opacity=1.0
-            
-            if (self.ScanFrames%8 == 0 and self.CurTextLine != -1 and 
-                    self.CurTextLine < 30): 
-                Player.getElementByID("line"+str(self.CurTextLine)).opacity=1.0
-                self.CurTextLine += 1
+
+            if (self.ScanFrames%8 == 0 and self.ScanFrames > 15): 
+                MessageArea.showNextLine()
             if (self.ScanFrames == 1):
                 Player.getElementByID("start_scan_aufblitzen").opacity=1.0
                 playSound("bioscan.wav")
@@ -365,8 +399,6 @@ class HandscanMover:
                 node = Player.getElementByID("handscanvideo")
                 node.opacity=1.0
                 node.play()
-            elif (self.ScanFrames == 15):
-                self.CurTextLine = 5
             elif (self.ScanFrames == 72):
                 node = Player.getElementByID("handscanvideo")
                 node.stop()
@@ -395,7 +427,7 @@ class HandscanMover:
         Player.getElementByID("handscan_balken_links").stop()
         Player.getElementByID("handscan_balken_rechts").stop()
         anim.fadeOut(Player, "auflage_lila", 300)
-        clearText()
+        MessageArea.clear()
         Player.getElementByID("start_scan_aufblitzen").opacity = 0
         Player.getElementByID("balken_ueberschriften").opacity = 0
 
@@ -448,11 +480,10 @@ class HandscanAbgebrochenMover:
                 TextElement("nicht identifiziert", "", "", [])
             ]
         self.CurFrame = 0
-        self.CurTextLine = 4
         self.WartenNode = Player.getElementByID("warten")
 
     def onStart(self):
-        calcTextPositions(self.TextElements, "F69679", "FA3C09")
+        MessageArea.calcTextPositions(self.TextElements, "F69679", "FA3C09")
         playSound("Beep2.wav")  
         self.WartenNode.opacity = 1
         self.WartenNode.x = 178
@@ -461,18 +492,16 @@ class HandscanAbgebrochenMover:
         Player.getElementByID("auflage_background").opacity = 1
 
     def onFrame(self): 
-        if (self.CurFrame%6 == 0 and self.CurTextLine != -1 and
-                self.CurTextLine < 30):
-            Player.getElementByID("line"+str(self.CurTextLine)).opacity=1.0
-            self.CurTextLine += 1
-        if (self.CurFrame == 45):
+        if self.CurFrame%6 == 0:
+            MessageArea.showNextLine()
+        if self.CurFrame == 45:
             playSound("nichtide.wav")  
-        elif (self.CurFrame == 150):
+        elif self.CurFrame == 150:
             changeMover(UnbenutztMover())
         self.CurFrame += 1
 
     def onStop(self): 
-        clearText()
+        MessageArea.clear()
 
 
 class KoerperscanMover:
@@ -500,18 +529,16 @@ class KoerperscanMover:
                   "Intelligenzquotient"])
             ]
         self.CurFrame = 0
-        self.CurTextLine = 4
         global Scanner
         Scanner.startScan()
 
     def onStart(self): 
-        calcTextPositions(self.TextElements, "CDF1C8", "FFFFFF")
+        MessageArea.calcTextPositions(self.TextElements, "CDF1C8", "FFFFFF")
         playSound("grundton.wav")
 
     def onFrame(self):
-        if (self.CurFrame%6 == 0 and self.CurTextLine < 30):
-            Player.getElementByID("line"+str(self.CurTextLine)).opacity=1.0
-            self.CurTextLine += 1
+        if self.CurFrame%6 == 0:
+            MessageArea.showNextLine()
         if (self.CurFrame == 45):
             playSound("zellen.wav")
         elif (self.CurFrame == 87):
@@ -521,10 +548,9 @@ class KoerperscanMover:
         self.CurFrame += 1
 
     def onStop(self): 
-        print("onStop")
+        MessageArea.clear()
         global Scanner
         Scanner.powerOff()
-        clearText()
 
 
 class WeitergehenMover:
@@ -535,23 +561,21 @@ class WeitergehenMover:
               TextElement("bitte weitergehen", "warn_icon", "", [])
             ]
         self.CurFrame = 0
-        self.CurTextLine = 4
 
     def onStart(self):
-        calcTextPositions(self.TextElements, "F69679", "FA3C09")
+        MessageArea.calcTextPositions(self.TextElements, "F69679", "FA3C09")
         playSound("weiterge.wav")
 
     def onFrame(self):
         BottomRotator.rotateBottom()
-        if (self.CurFrame%6 == 0 and self.CurTextLine < 30): 
-            Player.getElementByID("line"+str(self.CurTextLine)).opacity=1.0
-            self.CurTextLine += 1
+        if self.CurFrame%6 == 0: 
+           MessageArea.showNextLine()
         if (self.CurFrame%100 == 0):
             playSound("weiterge.wav")
         self.CurFrame += 1
 
     def onStop(self):
-        clearText()
+        MessageArea.clear()
 
 
 def onFrame():
@@ -619,6 +643,7 @@ Scanner = BodyScanner()
 
 TopRotator = TopRotator()
 BottomRotator = BottomRotator()
+MessageArea = MessageArea()
 
 Status = UNBENUTZT
 CurrentMover = UnbenutztMover()
