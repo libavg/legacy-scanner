@@ -112,13 +112,19 @@
             text=""/>
     </div>
     <div id="data_icons" x="541" y="78" z="4">
-      <image id="molekuel" x="0" z="1" opacity="0"
+      <image id="reiter5" x="85" z="0" opacity="0"
+          href="medien/reiter5.tif"/>
+      <image id="reiter6" x="85" z="0" opacity="0"
+          href="medien/reiter6.tif"/>
+      <image id="reiter7" x="85" z="0" opacity="0"
+          href="medien/reiter7.tif"/>
+      <image id="molekuel" x="14" y="3" z="1" opacity="0"
           href="medien/03_handscan/molekuel.tif"/>
-      <image id="helix" x="42" z="1" opacity="0"
+      <image id="helix" x="54" y="14" z="1" opacity="0"
           href="medien/03_handscan/helix.tif"/>
       <image id="welt" x="0" z="1" opacity="0"
           href="medien/03_handscan/welt.tif"/>
-      <image id="rahmen_3x5" x="42" opacity="0"
+      <image id="rahmen_3x5" x="46" opacity="0"
           href="medien/rahmen_3x5.tif"/>
       <image id="rahmen_5x3" x="0" opacity="0"
           href="medien/rahmen_5x3.tif"/>

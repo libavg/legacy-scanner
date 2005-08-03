@@ -155,6 +155,7 @@ class MessageArea:
             CurTextNode.font = Font
             CurTextNode.size = Size
             CurTextNode.color = Color
+        self.__TextElements = TextElements
         self.__ImageIDs = []
         CurLine = 5
         for CurElem in TextElements:
@@ -188,6 +189,8 @@ class MessageArea:
                 Player.getElementByID(Image[1]).opacity = 0
             if not(Image[2] == ""):
                 Player.getElementByID(Image[2]).opacity = 0
+        for ID in ["reiter5", "reiter6", "reiter7"]:
+            Player.getElementByID(ID).opacity = 0
         if self.__TimeoutID:
             Player.clearInterval(self.__TimeoutID)
 
@@ -195,17 +198,26 @@ class MessageArea:
         def showImage(Line, ID):
             if not(ID == ""):
                 Image = Player.getElementByID(ID)
-                Image.opacity = 1
-                Image.y = Player.getElementByID("line"+str(Line)).y
+                if not(Image == None):
+                    Image.opacity = 1
+                    Image.y = Player.getElementByID("line"+str(Line)).y
             self.__TimeoutID = 0
         if self.__Phase == 0:
+            numLines = len(self.__TextElements[self.__CurImage].Text)
+            curReiterID = "reiter"+str(numLines+1)
+            showImage(self.__ImageIDs[self.__CurImage][0], curReiterID)
+            self.__CurImage+=1
+            if self.__CurImage == len(self.__ImageIDs):
+                self.__Phase = 1
+                self.__CurImage = 0
+        elif self.__Phase == 1:
             curImageID = self.__ImageIDs[self.__CurImage]
             showImage(curImageID[0], curImageID[1])
             self.__TimeoutID = Player.setTimeout(100, 
                     lambda: showImage(curImageID[0], curImageID[2]))
             self.__CurImage+=1
             if self.__CurImage == len(self.__ImageIDs):
-                self.__Phase = 1
+                self.__Phase = 2
         elif self.__CurLine < 30:
             Player.getElementByID("line"+str(self.__CurLine)).opacity=1.0
             self.__CurLine += 1
@@ -410,14 +422,14 @@ class HandscanMover:
                 node = Player.getElementByID("handscanvideo")
                 node.stop()
                 anim.fadeOut(Player, "handscanvideo", 600)
-            elif (self.ScanFrames == 200):
+            elif (self.ScanFrames == 240):
                 if (random.random() > 0.5): 
                     changeMover(KoerperscanMover())
                 else:
                     changeMover(HandscanErkanntMover())
                     global Scanner
                     Scanner.powerOff()
-            self.ScanningBottomNode.y -= 3
+            self.ScanningBottomNode.y -= 2.5 
     
     def onStop(self):
         def setLine1Font():
@@ -546,11 +558,11 @@ class KoerperscanMover:
     def onFrame(self):
         if self.CurFrame%6 == 0:
             MessageArea.showNextLine()
-        if (self.CurFrame == 45):
+        if (self.CurFrame == 63):
             playSound("zellen.wav")
-        elif (self.CurFrame == 87):
+        elif (self.CurFrame == 105):
             playSound("bakterie.wav")
-        elif (self.CurFrame == 150):
+        elif (self.CurFrame == 168):
             changeMover(HandscanErkanntMover())
         self.CurFrame += 1
 
