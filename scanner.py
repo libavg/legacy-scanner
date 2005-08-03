@@ -11,6 +11,13 @@ import anim
 import time
 
 def playSound(Filename):
+    bException = 0
+    p = 1
+    while not(bException) and p > 0:
+        try:
+            p, status = os.waitpid(-1, os.WNOHANG)
+        except OSError:
+            bException = 1
     id = os.fork()
     if (id == 0):
         os.execl("/usr/bin/aplay", "aplay", "-MqN", "medien/cound/"+Filename)
@@ -471,7 +478,7 @@ class HandscanAbgebrochenMover:
         global Status
         Status = HANDSCAN_ABGEBROCHEN
         self.TextElements = [
-                TextElement("vorgang abgebrochen", "warn_icon", "",
+                TextElement("vorgang abgebrochen", "", "", # warn_icon
                     [ "Extremität zu früh entfernt",
                       "> Alpha-Helix nicht ercannt",
                       "> Unbecannte Macht",
@@ -619,7 +626,7 @@ if (bDebug):
     Log.setCategories(Log.APP |
                       Log.WARNING | 
                       Log.PROFILE |
-                      Log.PROFILE_LATEFRAMES |
+#                      Log.PROFILE_LATEFRAMES |
                       Log.CONFIG |
 #                      Log.MEMORY  |
 #                      Log.BLTS    |
@@ -631,7 +638,7 @@ else:
     Log.setCategories(Log.APP |
                       Log.WARNING | 
                       Log.PROFILE |
-                      Log.PROFILE_LATEFRAMES |
+#                      Log.PROFILE_LATEFRAMES |
                       Log.CONFIG |
 #                      Log.MEMORY  |
 #                      Log.BLTS    |
