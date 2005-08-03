@@ -565,7 +565,7 @@ class WeitergehenMover:
         global Status
         Status = WEITERGEHEN
         self.TextElements = [
-              TextElement("bitte weitergehen", "warn_icon", "", [])
+              TextElement("bitte weitergehen", "", "", []) # warn_icon
             ]
         self.CurFrame = 0
 
