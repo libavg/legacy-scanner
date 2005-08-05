@@ -1,10 +1,10 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 # TODO:
-#  - ctrl-c etc. schalten 220V aus.
+#  - exceptions, schalten 220V & Beleuchtung aus.
 #  - icons.
 #  - rotator an unterschiedlichen Stellen.
-import sys, os, math, random
+import sys, os, math, random, subprocess, signal, atexit
 sys.path.append('/usr/local/lib/python2.3/site-packages/avg')
 import avg
 import anim
@@ -222,12 +222,58 @@ class MessageArea:
             Player.getElementByID("line"+str(self.__CurLine)).opacity=1.0
             self.__CurLine += 1
 
+class ConradRelais:
+    def __init__(self):
+        self.__Relais = avg.ConradRelais(Player, 0)
+        numCards = self.__Relais.getNumCards()
+        if (numCards > 0):
+            Log.trace(Log.APP, 
+                    "Serial conrad relais board found. Enabling lighting control.")
+            self.__bActive = 1
+        else:
+            Log.trace(Log.APP, 
+                    "Serial conrad relais board not found. Disabling lighting control.")
+            self.__bActive = 0
+    def __del__(self):
+        if self.__bActive:
+            self.turnOff()
+    def turnOff(self):
+        if self.__bActive:
+            for i in range(6):
+                self.__Relais.set(0,i,0)
+    def setAmbientLight(self, bStatus):
+        if self.__bActive:
+            self.__Relais.set(0, 0, bStatus)
+    def setScannerAlarmLight(self, bStatus):
+        if self.__bActive:
+            self.__Relais.set(0, 1, bStatus)
+    def setAlarmLight(self, bStatus):
+        if self.__bActive:
+            self.__Relais.set(0, 2, bStatus)
+    def setScannerAmbientLight(self, bStatus):
+        if self.__bActive:
+            self.__Relais.set(0, 3, bStatus)
+            
+
+class LeerMover:
+    def __init__(self):
+        global Status
+        Status = LEER
+    def onStart(self):
+        ConradRelais.setAmbientLight(0)
+        ConradRelais.setScannerAmbientLight(0)
+        subprocess.call(["xset", "dpms", "force", "off"])
+    def onFrame(self):
+        pass
+    def onStop(self):
+        ConradRelais.setAmbientLight(1)
+        subprocess.call(["xset", "dpms", "force", "on"])
+
 class UnbenutztMover:
     def __init__(self):
         global Status
         Status = UNBENUTZT
         self.WartenNode = Player.getElementByID("warten")
-    
     def onStart(self):
         self.WartenNode.opacity = 1
         self.WartenNode.x = 178
@@ -239,11 +285,9 @@ class UnbenutztMover:
                 lambda : changeMover(Unbenutzt_AufforderungMover()))
         BottomRotator.CurIdleTriangle=0
         BottomRotator.TrianglePhase=0
-    
     def onFrame(self):
         TopRotator.rotateTopIdle()
         BottomRotator.rotateBottom()
-  
     def onStop(self):
         Player.clearInterval(self.TimeoutID)
         
@@ -371,6 +415,8 @@ class HandscanMover:
         MessageArea.calcTextPositions(self.TextElements, "CDF1C8", "FFFFFF")
     
     def onFrame(self):
+        global LastMovementTime
+        LastMovementTime = time.time()
         if (self.Phase == self.START):
             if (self.bRotateAussen):
                 node = Player.getElementByID("warten_aussen") 
@@ -476,7 +522,8 @@ class HandscanErkanntMover:
                 newMover)
     
     def onFrame(self):
-        pass
+        global LastMovementTime
+        LastMovementTime = time.time()
 
     def onStop(self):
         Player.clearInterval(self.StopTimeoutID)
@@ -511,6 +558,8 @@ class HandscanAbgebrochenMover:
         Player.getElementByID("auflage_background").opacity = 1
 
     def onFrame(self): 
+        global LastMovementTime
+        LastMovementTime = time.time()
         if self.CurFrame%6 == 0:
             MessageArea.showNextLine()
         if self.CurFrame == 45:
@@ -556,6 +605,8 @@ class KoerperscanMover:
         playSound("grundton.wav")
 
     def onFrame(self):
+        global LastMovementTime
+        LastMovementTime = time.time()
         if self.CurFrame%6 == 0:
             MessageArea.showNextLine()
         if (self.CurFrame == 63):
@@ -586,6 +637,8 @@ class WeitergehenMover:
         playSound("weiterge.wav")
 
     def onFrame(self):
+        global LastMovementTime
+        LastMovementTime = time.time()
         BottomRotator.rotateBottom()
         if self.CurFrame%6 == 0: 
            MessageArea.showNextLine()
@@ -596,21 +649,35 @@ class WeitergehenMover:
     def onStop(self):
         MessageArea.clear()
 
+LastMovementTime = time.time()
 
 def onFrame():
     CurrentMover.onFrame()
+    global LastMovementTime
+    if not(Status == LEER) and time.time()-LastMovementTime > EMPTY_TIMEOUT:
+        changeMover(LeerMover())
 
 def onKeyUp():
+    global LastMovementTime
+    LastMovementTime = time.time()
     Event= Player.getCurEvent()
-    # Handle photo sensor test code here
+    if Event.keystring == "1":
+        if Status == LEER:
+            changeMover(UnbenutztMover())
 
 def onMouseDown():
+    global LastMovementTime
+    LastMovementTime = time.time()
     global bMouseDown
     bMouseDown = 1
+    if (Status == LEER):
+        changeMover(UnbenutztMover())
     if (Status in [UNBENUTZT, UNBENUTZT_AUFFORDERUNG, AUFFORDERUNG]):
         changeMover(HandscanMover())
 
 def onMouseUp():
+    global LastMovementTime
+    LastMovementTime = time.time()
     global bMouseDown
     bMouseDown = 0
     if (Status == HANDSCAN):
@@ -620,17 +687,27 @@ def onMouseUp():
     elif (Status == WEITERGEHEN):
         changeMover(UnbenutztMover())
 
+def signalHandler(signum, frame):
+    global LastSignalHandler
+    cleanup()
+    Log.trace(Log.APP, "Terminating on signal "+str(signum))
+    Player.stop() 
+#   This isn't nice - other signal handlers aren't going to be called.
+#    LastSignalHandler(signum, frame)
 
+
+def cleanup():
+    global ConradRelais
+    ConradRelais.turnOff()
+    Scanner.powerOff()
 
 Player = avg.Player()
 Log = avg.Logger.get()
 
-ConradRelais = avg.ConradRelais(Player, 0)
-
-UNBENUTZT, UNBENUTZT_AUFFORDERUNG, AUFFORDERUNG, HANDSCAN, HANDSCAN_ABGEBROCHEN, \
+LEER, UNBENUTZT, UNBENUTZT_AUFFORDERUNG, AUFFORDERUNG, HANDSCAN, HANDSCAN_ABGEBROCHEN, \
 HANDSCAN_ERKANNT, AUFFORDERUNG_KOERPERSCAN, KOERPERSCAN, KOERPERSCAN_ERKANNT, \
 WEITERGEHEN, ALARM \
-= range(11)
+= range(12)
 
 bDebug = not(os.getenv('CLEUSE_DEPLOY'))
 if (bDebug):
@@ -643,6 +720,7 @@ if (bDebug):
 #                      Log.MEMORY  |
 #                      Log.BLTS    |
                       Log.EVENTS)
+    EMPTY_TIMEOUT = 10 
 else:
     Player.setResolution(1, 0, 0, 0)
     Player.showCursor(0)
@@ -655,19 +733,33 @@ else:
 #                      Log.MEMORY  |
 #                      Log.BLTS    |
                       Log.EVENTS)
+    # Time without movement until we blank the screen & dim the lights.
+    EMPTY_TIMEOUT = 60*5
 Player.loadFile("scanner.avg")
 Player.setInterval(10, onFrame)
 
 Scanner = BodyScanner() 
+ConradRelais = ConradRelais()
+LastSignalHandler = signal.signal(signal.SIGHUP, signalHandler)
+LastSignalHandler = signal.signal(signal.SIGINT, signalHandler)
+LastSignalHandler = signal.signal(signal.SIGQUIT, signalHandler)
+LastSignalHandler = signal.signal(signal.SIGILL, signalHandler)
+LastSignalHandler = signal.signal(signal.SIGABRT, signalHandler)
+LastSignalHandler = signal.signal(signal.SIGFPE, signalHandler)
+LastSignalHandler = signal.signal(signal.SIGSEGV, signalHandler)
+LastSignalHandler = signal.signal(signal.SIGPIPE, signalHandler)
+LastSignalHandler = signal.signal(signal.SIGALRM, signalHandler)
+LastSignalHandler = signal.signal(signal.SIGTERM, signalHandler)
 
 TopRotator = TopRotator()
 BottomRotator = BottomRotator()
 MessageArea = MessageArea()
 
-Status = UNBENUTZT
-CurrentMover = UnbenutztMover()
+Status = LEER 
+CurrentMover = LeerMover()
 CurrentMover.onStart()
 
-Player.play(30)
-Scanner.powerOff()
-
+try:
+    Player.play(30)
+finally:
+    cleanup()
