@@ -183,11 +183,13 @@ class MessageArea:
             node.text=""
             node.y=i*21
         for Image in self.__ImageIDs:
-            if not(Image[1] == ""):
-                Player.getElementByID(Image[1]).opacity = 0
-            if not(Image[2] == ""):
-                Player.getElementByID(Image[2]).opacity = 0
-        for ID in ["reiter5", "reiter6", "reiter7"]:
+            for i in range(2):
+                if not(Image[i+1] == ""):
+                    Img = Player.getElementByID(Image[i+1])
+                    if not(Img == None):
+                        Img.opacity = 0
+        for ID in ["reiter5", "reiter6", "reiter7",
+                "reiter5_weiss", "reiter6_weiss", "reiter7_weiss"]:
             Player.getElementByID(ID).opacity = 0
         if self.__TimeoutID:
             Player.clearInterval(self.__TimeoutID)
@@ -197,8 +199,11 @@ class MessageArea:
             if not(ID == ""):
                 Image = Player.getElementByID(ID)
                 if not(Image == None):
+                    if self.__Phase in [0,2]:
+                        Image.y = Player.getElementByID("line"+str(Line)).y
+                    else:
+                        Image.y = Player.getElementByID("line"+str(Line+1)).y
                     Image.opacity = 1
-                    Image.y = Player.getElementByID("line"+str(Line)).y
             self.__TimeoutID = 0
         if self.__Phase == 0:
             numLines = len(self.__TextElements[self.__CurImage].Text)
@@ -216,11 +221,20 @@ class MessageArea:
             self.__CurImage+=1
             if self.__CurImage == len(self.__ImageIDs):
                 self.__Phase = 2
+                self.__CurImage = 0
         elif self.__CurLine < 30:
             Player.getElementByID("line"+str(self.__CurLine)).opacity=1.0
             for ImageID in self.__ImageIDs:
-                if ImageID[0] == self.__CurLine and ImageID[3] != "":
-                    playSound(ImageID[3])
+                if ImageID[0] == self.__CurLine:
+                    numLines = len(self.__TextElements[self.__CurImage].Text)
+                    curReiterID = "reiter"+str(numLines+1)+"_weiss"
+                    showImage(self.__ImageIDs[self.__CurImage][0], curReiterID)
+                    Image = Player.getElementByID(self.__ImageIDs[self.__CurImage][2])
+                    if type(Image) == avg.Video:
+                        Image.play()
+                    self.__CurImage+=1
+                    if ImageID[3] != "":
+                        playSound(ImageID[3])
             self.__CurLine += 1
 
 class ConradRelais:
@@ -443,7 +457,7 @@ class HandscanMover:
                 node.weight="bold"
                 anim.fadeIn(Player, "line1", 1000, 1.0)
                 Player.getElementByID("line1").font="Eurostile"
-                anim.fadeIn(Player, "balken_ueberschriften", 1000, 1.0)
+                anim.fadeIn(Player, "balken_ueberschriften", 300, 1.0)
                 self.Phase = self.SCANNING
         elif (self.Phase == self.SCANNING):    
             self.ScanFrames += 1
@@ -580,7 +594,7 @@ class KoerperscanMover:
         global Status
         Status = KOERPERSCAN
         self.TextElements = [
-            TextElement("grundtonus", "", "",
+            TextElement("grundtonus", "grundtonus", "rahmen_3x5",
                 [ "Topographie",
                   "> Gliedmaße",
                   "Topologie",
@@ -588,14 +602,14 @@ class KoerperscanMover:
                   "> Wirbelsäule",
                   "Organe und Innereien"],
                   "grundton.wav"),
-            TextElement("zellen", "", "",
+            TextElement("zellen", "zellen", "rahmen_5x4",
                 [ "Cerngrundbasisplasma",
                   "Chromatin",
                   "Ribosom",
                   "Endoplasmatisches Reticulum",
                   "Tunnelproteine"],
                   "zellen.wav"),
-            TextElement("gehirn", "", "",
+            TextElement("gehirn", "gehirn", "rahmen_4x4",
                 [ "Thermaler PET scan",
                   "> Cerebraler Cortex",
                   "> Occipatalanalyse",
@@ -615,7 +629,7 @@ class KoerperscanMover:
         LastMovementTime = time.time()
         if self.CurFrame%6 == 0:
             MessageArea.showNextLine()
-        if (self.CurFrame == 168):
+        if (self.CurFrame == 195):
             changeMover(HandscanErkanntMover())
         self.CurFrame += 1
 

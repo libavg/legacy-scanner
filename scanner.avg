@@ -112,24 +112,31 @@
             text=""/>
     </div>
     <div id="data_icons" x="541" y="78" z="4">
-      <image id="reiter5" x="85" z="0" opacity="0"
-          href="medien/reiter5.tif"/>
-      <image id="reiter6" x="85" z="0" opacity="0"
-          href="medien/reiter6.tif"/>
-      <image id="reiter7" x="85" z="0" opacity="0"
-          href="medien/reiter7.tif"/>
-      <image id="molekuel" x="14" y="3" z="1" opacity="0"
+      <image id="reiter5" x="85" opacity="0" z="0" href="medien/reiter5.tif"/>
+      <image id="reiter6" x="85" opacity="0" z="0" href="medien/reiter6.tif"/>
+      <image id="reiter7" x="85" opacity="0" z="0" href="medien/reiter7.tif"/>
+      <image id="reiter5_weiss" x="85" opacity="0" z="1" href="medien/reiter5_weiss.tif"/>
+      <image id="reiter6_weiss" x="85" opacity="0" z="1" href="medien/reiter6_weiss.tif"/>
+      <image id="reiter7_weiss" x="85" opacity="0" z="1" href="medien/reiter7_weiss.tif"/>
+      <image id="molekuel" x="14" y="3" opacity="0" z="4"
           href="medien/03_handscan/molekuel.tif"/>
-      <image id="helix" x="54" y="14" z="1" opacity="0"
+      <image id="helix" x="54" y="14" opacity="0" z="4"
           href="medien/03_handscan/helix.tif"/>
-      <image id="welt" x="0" z="1" opacity="0"
-          href="medien/03_handscan/welt.tif"/>
-      <image id="rahmen_3x5" x="46" opacity="0"
-          href="medien/rahmen_3x5.tif"/>
-      <image id="rahmen_5x3" x="0" opacity="0"
-          href="medien/rahmen_5x3.tif"/>
-      <image id="rahmen_5x4" x="0" opacity="0"
-          href="medien/rahmen_5x4.tif"/>
+      <image id="welt" x="0" opacity="0" z="4" href="medien/03_handscan/welt.tif"/>
+      <image id="grundtonus" x="54" opacity="0" z="4"
+          href="medien/07_koerperscan/grundtonus.tif"/>
+      <image id="zellen" x="14" opacity="0" z="4" href="medien/07_koerperscan/zellen.tif"/>
+      <video id="gehirn" x="14" opacity="0" z="4" 
+          href="medien/07_koerperscan/gehirnscan.mov"/>
+      <image id="nervensystem" x="0" opacity="0" z="4" 
+          href="medien/07_koerperscan/nervensystem.tif"/>
+      <image id="viren" x="0" opacity="0" z="4" href="medien/07_koerperscan/viren.tif"/>
+    
+      
+      <image id="rahmen_3x5" x="46" opacity="0" z="3" href="medien/rahmen_3x5.tif"/>
+      <image id="rahmen_5x3" x="0" opacity="0" z="3" href="medien/rahmen_5x3.tif"/>
+      <image id="rahmen_5x4" x="0" opacity="0" z="3" href="medien/rahmen_5x4.tif"/>
+      <image id="rahmen_4x4" x="23" opacity="0" z="3" href="medien/rahmen_4x4.tif"/>
     </div>
   </div>
   <div id="auflage" x="0" y="768">
