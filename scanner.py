@@ -138,11 +138,12 @@ class BottomRotator:
                 self.CurIdleTriangle = 0
 
 class TextElement:
-    def __init__(self, Title, ImageID, RahmenID, Text):
+    def __init__(self, Title, ImageID, RahmenID, Text, AudioFile):
         self.Title = Title
         self.ImageID = ImageID
         self.RahmenID = RahmenID
         self.Text = Text
+        self.AudioFile = AudioFile
 
 class MessageArea:
     def __init__(self):
@@ -161,7 +162,8 @@ class MessageArea:
         for CurElem in TextElements:
             setTextLine(CurLine, CurElem.Title, "Eurostile", 18, TitleColor)
             Player.getElementByID("line"+str(CurLine)).y -= 5
-            self.__ImageIDs.append((CurLine, CurElem.RahmenID, CurElem.ImageID))
+            self.__ImageIDs.append((CurLine, CurElem.RahmenID, CurElem.ImageID, 
+                    CurElem.AudioFile))
             self.__CurImage = 0
             CurLine += 1
             for CurText in CurElem.Text:
@@ -221,6 +223,10 @@ class MessageArea:
         elif self.__CurLine < 30:
             Player.getElementByID("line"+str(self.__CurLine)).opacity=1.0
             self.__CurLine += 1
+            for ImageID in self.__ImageIDs:
+                if ImageID[0] == self.__CurLine and ImageID[3] != "":
+                    playSound(ImageID[3])
+            
 
 class ConradRelais:
     def __init__(self):
@@ -378,20 +384,23 @@ class HandscanMover:
                     [ "Electrische Felder &amp; Wellen",
                       "Quantenanalyse",
                       "Atomare Zusammensetzung",
-                      "Datensynthese"]),
+                      "Datensynthese"], 
+                      ""),
                 TextElement("genetische transcription", "helix", "rahmen_3x5",
                     [ "Analyse der Alpha-Helix",
                       "Arten der Pilzgattung Candida",
                       "Mitochondrien",
                       "> von Crosophila",
                       "> höherer Pflanzen",
-                      "> von Säugern"]),
+                      "> von Säugern"], 
+                      ""),
                 TextElement("lebensform &amp; hercunft", "welt", "rahmen_5x3",
                     [ "Abgleich mit dem cosmolab",
                       "> Welten der Sauerstoffatmer", 
                       "> Verbotene Welten",
                       "> Virtuelle Orte",
-                      "> Träume"])
+                      "> Träume"], 
+                      "")
             ]
         self.bRotateAussen = 1
         self.bRotateInnen = 1
@@ -458,7 +467,6 @@ class HandscanMover:
                 Player.getElementByID("handscan_balken_links").play()
                 Player.getElementByID("handscan_balken_rechts").play()
                 anim.fadeOut(Player, "auflage_background", 200)
-#                playSound("handscan.wav")
             elif (self.ScanFrames == 6):
                 anim.fadeOut(Player, "start_scan_aufblitzen", 100)
                 node = Player.getElementByID("handscanvideo")
@@ -542,8 +550,10 @@ class HandscanAbgebrochenMover:
                       "> Alpha-Helix nicht ercannt",
                       "> Unbecannte Macht",
                       "> Lebensform unbecannt",
-                      "> Wiederholen, ignorieren, abbrechen?"]),
-                TextElement("nicht identifiziert", "", "", [])
+                      "> Wiederholen, ignorieren, abbrechen?"],
+                      ""),
+                TextElement("nicht identifiziert", "", "", [],
+                    "nichtide.wav")
             ]
         self.CurFrame = 0
         self.WartenNode = Player.getElementByID("warten")
@@ -562,9 +572,7 @@ class HandscanAbgebrochenMover:
         LastMovementTime = time.time()
         if self.CurFrame%6 == 0:
             MessageArea.showNextLine()
-        if self.CurFrame == 45:
-            playSound("nichtide.wav")  
-        elif self.CurFrame == 150:
+        if self.CurFrame == 150:
             changeMover(UnbenutztMover())
         self.CurFrame += 1
 
@@ -583,18 +591,21 @@ class KoerperscanMover:
                   "Topologie",
                   "Scelettaufbau",
                   "> Wirbelsäule",
-                  "Organe und Innereien"]),
+                  "Organe und Innereien"],
+                  "grundton.wav"),
             TextElement("zellen", "", "",
                 [ "Cerngrundbasisplasma",
                   "Chromatin",
                   "Ribosom",
                   "Endoplasmatisches Reticulum",
-                  "Tunnelproteine"]),
+                  "Tunnelproteine"],
+                  "zellen.wav"),
             TextElement("gehirn", "", "",
                 [ "Thermaler PET scan",
                   "> Cerebraler Cortex",
                   "> Occipatalanalyse",
-                  "Intelligenzquotient"])
+                  "Intelligenzquotient"],
+                  "bakterie.wav")
             ]
         self.CurFrame = 0
         global Scanner
@@ -602,17 +613,12 @@ class KoerperscanMover:
 
     def onStart(self): 
         MessageArea.calcTextPositions(self.TextElements, "CDF1C8", "FFFFFF")
-        playSound("grundton.wav")
 
     def onFrame(self):
         global LastMovementTime
         LastMovementTime = time.time()
         if self.CurFrame%6 == 0:
             MessageArea.showNextLine()
-        if (self.CurFrame == 63):
-            playSound("zellen.wav")
-        elif (self.CurFrame == 105):
-            playSound("bakterie.wav")
         elif (self.CurFrame == 168):
             changeMover(HandscanErkanntMover())
         self.CurFrame += 1
@@ -628,7 +634,7 @@ class WeitergehenMover:
         global Status
         Status = WEITERGEHEN
         self.TextElements = [
-              TextElement("bitte weitergehen", "", "", []) # warn_icon
+              TextElement("bitte weitergehen", "", "", [], "") # warn_icon
             ]
         self.CurFrame = 0
 
