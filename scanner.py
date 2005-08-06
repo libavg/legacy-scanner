@@ -1,11 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
-# TODO:
-#  - exceptions, schalten 220V & Beleuchtung aus.
-#  - icons.
-#  - rotator an unterschiedlichen Stellen.
 import sys, os, math, random, subprocess, signal, atexit
-sys.path.append('/usr/local/lib/python2.3/site-packages/avg')
+sys.path.append('/usr/local/lib/python2.4/site-packages/avg')
 import avg
 import anim
 import time
@@ -222,11 +218,10 @@ class MessageArea:
                 self.__Phase = 2
         elif self.__CurLine < 30:
             Player.getElementByID("line"+str(self.__CurLine)).opacity=1.0
-            self.__CurLine += 1
             for ImageID in self.__ImageIDs:
                 if ImageID[0] == self.__CurLine and ImageID[3] != "":
                     playSound(ImageID[3])
-            
+            self.__CurLine += 1
 
 class ConradRelais:
     def __init__(self):
@@ -385,7 +380,7 @@ class HandscanMover:
                       "Quantenanalyse",
                       "Atomare Zusammensetzung",
                       "Datensynthese"], 
-                      ""),
+                      "handscan.wav"),
                 TextElement("genetische transcription", "helix", "rahmen_3x5",
                     [ "Analyse der Alpha-Helix",
                       "Arten der Pilzgattung Candida",
@@ -613,13 +608,14 @@ class KoerperscanMover:
 
     def onStart(self): 
         MessageArea.calcTextPositions(self.TextElements, "CDF1C8", "FFFFFF")
+        playSound("stehenbl.wav")
 
     def onFrame(self):
         global LastMovementTime
         LastMovementTime = time.time()
         if self.CurFrame%6 == 0:
             MessageArea.showNextLine()
-        elif (self.CurFrame == 168):
+        if (self.CurFrame == 168):
             changeMover(HandscanErkanntMover())
         self.CurFrame += 1
 
