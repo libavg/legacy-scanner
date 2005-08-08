@@ -34,25 +34,26 @@ class BodyScanner:
         if self.ParPort.getStatusLine(avg.STATUS_PAPEROUT):
             Log.trace(Log.APP, 
                     "Parallel conrad relais board not found. Disabling body scanner.")
-            self.bActive = 0
+            self.__bConnected = 0
         else:
             Log.trace(Log.APP, 
                     "Parallel conrad relais board found. Enabling body scanner.")
-            self.bActive = 1
+            self.__bConnected = 1
         self.lastMotorOnTime = time.time();
         self.lastMotorDirTime = time.time();
-    def powerOn(self):
-        if self.bActive:
+    def __powerOn(self):
+        if self.__bConnected:
             self.__setDataLine(avg.PARPORTDATA1, 1)
             self.__setDataLine(avg.PARPORTDATA2, 1)
     def powerOff(self):
-        if self.bActive:
+        if self.__bConnected:
             self.__setDataLine(avg.PARPORTDATA1, 0)
             self.__setDataLine(avg.PARPORTDATA2, 0)
     def startScan(self):
-        if self.bActive:
-            self.__setDataLine(avg.PARPORTDATA0, 1)
-            Player.setTimeout(1000, lambda : self.__setDataLine(avg.PARPORTDATA0, 0)) 
+        if self.__bConnected:
+            self.__powerOn();
+            Player.setTimeout(500, lambda: self.__setDataLine(avg.PARPORTDATA0, 1))
+            Player.setTimeout(2500, lambda : self.__setDataLine(avg.PARPORTDATA0, 0)) 
     def poll(self):
         def printPPLine(line, name):
             print name,
@@ -60,9 +61,9 @@ class BodyScanner:
                 print ": off",
             else:
                 print ":  on",
-        if self.bActive:
-            bMotorOn = self.ParPort.getStatusLine(avg.STATUS_ACK)
-            bMotorDir = self.ParPort.getStatusLine(avg.STATUS_BUSY)
+        if self.__bConnected:
+            bMotorDir = self.ParPort.getStatusLine(avg.STATUS_ACK)
+            bMotorOn = self.ParPort.getStatusLine(avg.STATUS_BUSY)
             if bMotorOn != self.bMotorOn:
                 if bMotorOn:
                     Log.trace(Log.APP, "Body scanner motor on.")
@@ -72,19 +73,30 @@ class BodyScanner:
                     Log.trace(Log.WARNING, "Body scanner motor on bouncing?")
                 self.lastMotorOnTime = time.time();
             if bMotorDir != self.bMotorDir:
-                if bMotorOn:
-                    Log.trace(Log.APP, "Body scanner moving up.")
-                else:
+                if bMotorDir:
                     Log.trace(Log.APP, "Body scanner moving down.")
+                else:
+                    Log.trace(Log.APP, "Body scanner moving up.")
                 if time.time() - self.lastMotorDirTime < 1:
                     Log.trace(Log.WARNING, "Body scanner motor dir bouncing?")
                     self.lastMotorDirTime = time.time();
             self.bMotorOn = bMotorOn
             self.bMotorDir = bMotorDir
-            printPPLine(avg.STATUS_ACK, "STATUS_ACK")
-            print ", ",
-            printPPLine(avg.STATUS_BUSY, "STATUS_BUSY") 
-            print
+#            printPPLine(avg.STATUS_ACK, "STATUS_ACK")
+#            print ", ",
+#            printPPLine(avg.STATUS_BUSY, "STATUS_BUSY") 
+#            print
+    def isUserInRoom(self):
+        # (ParPort.SELECT == true) == weißes Kabel == Benutzer in Schleuse
+        return self.__bConnected and not(self.ParPort.getStatusLine(avg.STATUS_SELECT))
+    def isUserInFrontOfScanner(self):
+        return self.__bConnected and not(self.ParPort.getStatusLine(avg.STATUS_ERROR))
+    def isMovingDown(self):
+        return not(self.bMotorDir) and self.bMotorOn
+#    def isScannerAtBottom(self):
+#        return self.__bConnected and ParPort.getStatusLine(avg.STATUS_BUSY)
+    def isScannerConnected(self):
+        return self.__bConnected
     def __setDataLine(self, line, value):
         self.ParPort.setControlLine(avg.CONTROL_STROBE, 0)
         if value:
@@ -93,7 +105,7 @@ class BodyScanner:
             self.ParPort.clearDataLines(line)
         self.ParPort.setControlLine(avg.CONTROL_STROBE, 1)
         time.sleep(0.001);
-        self.ParPort.setControlLine(avg.CONTROL_STROBE, 0 )
+        self.ParPort.setControlLine(avg.CONTROL_STROBE, 0)
 
 class TopRotator:
     def rotateAussenIdle(self):
@@ -230,8 +242,9 @@ class MessageArea:
                     curReiterID = "reiter"+str(numLines+1)+"_weiss"
                     showImage(self.__ImageIDs[self.__CurImage][0], curReiterID)
                     Image = Player.getElementByID(self.__ImageIDs[self.__CurImage][2])
-                    if type(Image) == avg.Video:
-                        Image.play()
+#                    print type(Image)
+#                    if type(Image) == type(avg.Video):
+#                        Image.play()
                     self.__CurImage+=1
                     if ImageID[3] != "":
                         playSound(ImageID[3])
@@ -277,7 +290,7 @@ class LeerMover:
     def onStart(self):
         ConradRelais.setAmbientLight(0)
         ConradRelais.setScannerAmbientLight(0)
-        subprocess.call(["xset", "dpms", "force", "off"])
+        subprocess.call(["xset", "dpms", "force", "suspend"])
     def onFrame(self):
         pass
     def onStop(self):
@@ -289,6 +302,7 @@ class UnbenutztMover:
         global Status
         Status = UNBENUTZT
         self.WartenNode = Player.getElementByID("warten")
+        self.__LastUserTime = 0
     def onStart(self):
         self.WartenNode.opacity = 1
         self.WartenNode.x = 178
@@ -296,15 +310,25 @@ class UnbenutztMover:
         Player.getElementByID("idle").opacity = 1
         Player.getElementByID("auflage_background").opacity = 1
         MessageArea.clear()
-        self.TimeoutID = Player.setTimeout(60000, 
-                lambda : changeMover(Unbenutzt_AufforderungMover()))
+        global Scanner
+        if not Scanner.isScannerConnected:
+            self.TimeoutID = Player.setTimeout(60000, 
+                    lambda : changeMover(Unbenutzt_AufforderungMover()))
         BottomRotator.CurIdleTriangle=0
         BottomRotator.TrianglePhase=0
     def onFrame(self):
         TopRotator.rotateTopIdle()
         BottomRotator.rotateBottom()
+        global Scanner
+        if Scanner.isUserInFrontOfScanner():
+            Log.trace(Log.APP, "User in front of scanner")
+            now = time.time()
+            if now-self.__LastUserTime > 20:
+                changeMover(Unbenutzt_AufforderungMover())
+                self.__LastUserTime = now
     def onStop(self):
-        Player.clearInterval(self.TimeoutID)
+        if not Scanner.isScannerConnected:
+                Player.clearInterval(self.TimeoutID)
         
 class Unbenutzt_AufforderungMover:
     def __init__(self):
@@ -421,7 +445,6 @@ class HandscanMover:
         self.ScanFrames = 0
         self.ScanningBottomNode = Player.getElementByID("scanning_bottom")
         global Scanner
-        Scanner.powerOn()
         Player.setInterval(200, Scanner.poll)
 
     def onStart(self): 
@@ -629,14 +652,21 @@ class KoerperscanMover:
         LastMovementTime = time.time()
         if self.CurFrame%6 == 0:
             MessageArea.showNextLine()
-        if (self.CurFrame == 195):
-            changeMover(HandscanErkanntMover())
+        if Scanner.isScannerConnected():
+            if Scanner.isMovingDown():
+                changeMover(HandscanErkanntMover())
+            if self.CurFrame == 20*30:
+                changeMover(HandscanErkanntMover())
+                Scanner.powerOff()
+        else:
+            if self.CurFrame == 195:
+                changeMover(HandscanErkanntMover())
         self.CurFrame += 1
 
     def onStop(self): 
         MessageArea.clear()
         global Scanner
-        Scanner.powerOff()
+        Player.setTimeout(6000,  lambda: Scanner.powerOff())
 
 
 class WeitergehenMover:
@@ -670,8 +700,13 @@ LastMovementTime = time.time()
 def onFrame():
     CurrentMover.onFrame()
     global LastMovementTime
+    if (Scanner.isUserInRoom() or Scanner.isUserInFrontOfScanner() or 
+            not(Scanner.isScannerConnected)):
+        LastMovementTime = time.time()
     if not(Status == LEER) and time.time()-LastMovementTime > EMPTY_TIMEOUT:
         changeMover(LeerMover())
+    if Status == LEER and time.time()-LastMovementTime < EMPTY_TIMEOUT:
+        changeMover(UnbenutztMover())
 
 def onKeyUp():
     global LastMovementTime
@@ -708,9 +743,6 @@ def signalHandler(signum, frame):
     cleanup()
     Log.trace(Log.APP, "Terminating on signal "+str(signum))
     Player.stop() 
-#   This isn't nice - other signal handlers aren't going to be called.
-#    LastSignalHandler(signum, frame)
-
 
 def cleanup():
     global ConradRelais
@@ -771,8 +803,8 @@ TopRotator = TopRotator()
 BottomRotator = BottomRotator()
 MessageArea = MessageArea()
 
-Status = LEER 
-CurrentMover = LeerMover()
+Status = UNBENUTZT 
+CurrentMover = UnbenutztMover()
 CurrentMover.onStart()
 
 try:
