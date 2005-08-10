@@ -128,7 +128,7 @@
       <image id="grundtonus" x="54" opacity="0" z="4"
           href="medien/07_koerperscan/grundtonus.tif"/>
       <image id="zellen" x="14" opacity="0" z="4" href="medien/07_koerperscan/zellen.tif"/>
-      <video id="gehirn" x="14" opacity="0" z="4" 
+      <video id="gehirn" x="36" opacity="0" z="4" 
           href="medien/07_koerperscan/gehirnscan.mov"/>
       <image id="nervensystem" x="0" opacity="0" z="4" 
           href="medien/07_koerperscan/nervensystem.tif"/>
@@ -138,7 +138,7 @@
       <image id="rahmen_3x5" x="46" opacity="0" z="3" href="medien/rahmen_3x5.tif"/>
       <image id="rahmen_5x3" x="0" opacity="0" z="3" href="medien/rahmen_5x3.tif"/>
       <image id="rahmen_5x4" x="0" opacity="0" z="3" href="medien/rahmen_5x4.tif"/>
-      <image id="rahmen_4x4" x="23" opacity="0" z="3" href="medien/rahmen_4x4.tif"/>
+      <image id="rahmen_4x4" x="33" opacity="0" z="3" href="medien/rahmen_4x4.tif"/>
     </div>
   </div>
   <div id="auflage" x="0" y="768">

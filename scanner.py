@@ -251,9 +251,8 @@ class MessageArea:
                     curReiterID = "reiter"+str(numLines+1)+"_weiss"
                     showImage(self.__ImageIDs[self.__CurImage][0], curReiterID)
                     Image = Player.getElementByID(self.__ImageIDs[self.__CurImage][2])
-#                    print type(Image)
-#                    if type(Image) == type(avg.Video):
-#                        Image.play()
+                    if type(Image) == type(avg.Video()):
+                        Image.play()
                     self.__CurImage+=1
                     if ImageID[3] != "":
                         playSound(ImageID[3])
@@ -623,6 +622,7 @@ class HandscanAbgebrochenMover:
 
 
 class KoerperscanMover:
+    # TODO: Stop on mouseup
     def __startVideo(self):
         Node = Player.getElementByID("koerperscan")
         Node.opacity=1
