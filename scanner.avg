@@ -43,6 +43,8 @@
                 z="2" opacity="0"/>
         <image id="green_screen" opacity="0" width="480" height="640"
                 href="medien/05_handscan_erkannt/green_screen.tif"/>
+        <video id="koerperscan" href="medien/07_koerperscan/bodyscan.mp4"
+                x="-80" y="80" z="2" opacity="0" angle="1.57075"/>
     </div>
     <image id="willkommen_text" x="607" y="675" width="330" height="13"
         z="3" opacity="0"
