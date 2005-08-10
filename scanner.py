@@ -678,7 +678,7 @@ class KoerperscanMover:
                 changeMover(HandscanErkanntMover())
                 Scanner.powerOff()
         else:
-            if self.CurFrame == 195:
+            if self.CurFrame == 8*30:
                 changeMover(HandscanErkanntMover())
         self.CurFrame += 1
 
