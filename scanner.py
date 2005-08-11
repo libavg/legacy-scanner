@@ -3,12 +3,12 @@
 
 # TODO:
 # - 220 V-Lampen (code, real life)
-# - Rotator bewegen.
+# - Fremdkörper, Alarmsequenz
 # - Ablaufbalken unten, Warnicon, Willkommenicon etc.
 # - Test Bewegungsmelder
 # - Mehr Audio
-# - Fremdkörper, Alarmsequenz
 # Later:
+# - Rotator bewegen.
 # - Stromspar-Strategie
 import sys, os, math, random, subprocess, signal, atexit
 sys.path.append('/usr/local/lib/python2.4/site-packages/avg')
@@ -296,6 +296,7 @@ class ConradRelais:
                     "Serial conrad relais board found. Enabling lighting control.")
             self.__bActive = 1
             self.turnOff()
+            self.setAmbientLight(1)
         else:
             Log.trace(Log.APP, 
                     "Serial conrad relais board not found. Disabling lighting control.")
@@ -309,16 +310,20 @@ class ConradRelais:
                 self.__Relais.set(0,i,0)
     def setAmbientLight(self, bStatus):
         if self.__bActive:
+            Log.trace(Log.APP, "Ambient light: "+str(bStatus))
             self.__Relais.set(0, 0, bStatus)
     def setScannerAlarmLight(self, bStatus):
         if self.__bActive:
+            Log.trace(Log.APP, "Sacnner alarm light: "+str(bStatus))
             self.__Relais.set(0, 1, bStatus)
     def setAlarmLight(self, bStatus):
         if self.__bActive:
+            Log.trace(Log.APP, "Alarm light: "+str(bStatus))
             self.__Relais.set(0, 2, bStatus)
     def setScannerAmbientLight(self, bStatus):
         if self.__bActive:
-            self.__Relais.set(0, 3, bStatus)
+            Log.trace(Log.APP, "Scanner ambient light: "+str(bStatus))
+            self.__Relais.set(0, 3, bStatusAmbient)
             
 
 class LeerMover:
