@@ -295,6 +295,7 @@ class ConradRelais:
             Log.trace(Log.APP, 
                     "Serial conrad relais board found. Enabling lighting control.")
             self.__bActive = 1
+            self.turnOff()
         else:
             Log.trace(Log.APP, 
                     "Serial conrad relais board not found. Disabling lighting control.")
@@ -636,6 +637,7 @@ class HandscanAbgebrochenMover:
         self.WartenNode.y = 241
         Player.getElementByID("idle").opacity = 1
         Player.getElementByID("auflage_background").opacity = 1
+        ConradRelais.setAlarmLight(1)
 
     def onFrame(self): 
         global LastMovementTime
@@ -648,7 +650,7 @@ class HandscanAbgebrochenMover:
 
     def onStop(self): 
         MessageArea.clear()
-
+        ConradRelais.setAlarmLight(0)
 
 class KoerperscanMover:
     def __startVideo(self):
