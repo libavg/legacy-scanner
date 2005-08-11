@@ -120,14 +120,14 @@
       <image id="reiter5_weiss" x="85" opacity="0" z="1" href="medien/reiter5_weiss.tif"/>
       <image id="reiter6_weiss" x="85" opacity="0" z="1" href="medien/reiter6_weiss.tif"/>
       <image id="reiter7_weiss" x="85" opacity="0" z="1" href="medien/reiter7_weiss.tif"/>
-      <image id="molekuel" x="14" y="3" opacity="0" z="4"
+      <image id="molekuel" x="0" y="0" opacity="0" z="4"
           href="medien/03_handscan/molekuel.tif"/>
-      <image id="helix" x="54" y="14" opacity="0" z="4"
+      <image id="helix" x="46" y="0" opacity="0" z="4"
           href="medien/03_handscan/helix.tif"/>
-      <image id="welt" x="0" opacity="0" z="4" href="medien/03_handscan/welt.tif"/>
+      <image id="welt" x="" opacity="0" z="4" href="medien/03_handscan/welt.tif"/>
       <image id="grundtonus" x="54" opacity="0" z="4"
           href="medien/07_koerperscan/grundtonus.tif"/>
-      <image id="zellen" x="14" opacity="0" z="4" href="medien/07_koerperscan/zellen.tif"/>
+      <image id="zellen" x="0" opacity="0" z="4" href="medien/07_koerperscan/zellen.tif"/>
       <video id="gehirn" x="36" opacity="0" z="4" 
           href="medien/07_koerperscan/gehirnscan.mov"/>
       <image id="nervensystem" x="0" opacity="0" z="4" 

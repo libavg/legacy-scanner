@@ -1,5 +1,15 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
+
+# TODO:
+# - 220 V-Lampen (code, real life)
+# - Rotator bewegen.
+# - Ablaufbalken unten, Warnicon, Willkommenicon etc.
+# - Test Bewegungsmelder
+# - Mehr Audio
+# - Fremdkörper, Alarmsequenz
+# Later:
+# - Stromspar-Strategie
 import sys, os, math, random, subprocess, signal, atexit
 sys.path.append('/usr/local/lib/python2.4/site-packages/avg')
 import avg
@@ -40,21 +50,38 @@ class BodyScanner:
             Log.trace(Log.APP, 
                     "Parallel conrad relais board found. Enabling body scanner.")
             self.__bConnected = 1
-        self.lastMotorOnTime = time.time();
-        self.lastMotorDirTime = time.time();
+        self.lastMotorOnTime = time.time()
+        self.lastMotorDirTime = time.time()
+        self.__isScanning = 0
     def __powerOn(self):
         if self.__bConnected:
+            Log.trace(Log.APP, "Body scanner power on")
             self.__setDataLine(avg.PARPORTDATA1, 1)
             self.__setDataLine(avg.PARPORTDATA2, 1)
+            self.__PowerTimeoutID = Player.setTimeout(20000, self.disable)
     def powerOff(self):
         if self.__bConnected:
+            Log.trace(Log.APP, "Body scanner power off")
             self.__setDataLine(avg.PARPORTDATA1, 0)
             self.__setDataLine(avg.PARPORTDATA2, 0)
+            Player.clearTimeout(self.__PowerTimeoutID)
+            self.__isScanning = 0
+    def disable(self):
+        Log.trace(Log.APP, "Body scanner not deactivating by itself - disabling.")
+        powerOff()
+        self.__bConnected = 0
     def startScan(self):
+        def moveInit(self):
+            self.__setDataLine(avg.PARPORTDATA0, 1)
+            Log.trace("Body scanner move init")
+        def moveInitDone(self):
+            self.__setDataLine(avg.PARPORTDATA0, 0)
+            Log.trace("Body scanner move init done")
         if self.__bConnected:
             self.__powerOn();
-            Player.setTimeout(500, lambda: self.__setDataLine(avg.PARPORTDATA0, 1))
-            Player.setTimeout(2500, lambda : self.__setDataLine(avg.PARPORTDATA0, 0)) 
+            Player.setTimeout(500, moveInit())
+            Player.setTimeout(2500, moveInitDone()) 
+            self.__isScanning = 1
     def poll(self):
         def printPPLine(line, name):
             print name,
@@ -80,7 +107,7 @@ class BodyScanner:
                     Log.trace(Log.APP, "Body scanner moving up signal.")
                 if time.time() - self.lastMotorDirTime < 1:
                     Log.trace(Log.WARNING, "Body scanner motor dir bouncing?")
-                    self.lastMotorDirTime = time.time();
+                self.lastMotorDirTime = time.time();
             if bMotorDir != self.bMotorDir or bMotorOn != self.bMotorOn:
                 if not(bMotorOn):
                     Log.trace(Log.APP, "    --> Motor is off.")
@@ -91,10 +118,8 @@ class BodyScanner:
                         Log.trace(Log.APP, "    -> Moving down.")
             self.bMotorOn = bMotorOn
             self.bMotorDir = bMotorDir
-#            printPPLine(avg.STATUS_ACK, "STATUS_ACK")
-#            print ", ",
-#            printPPLine(avg.STATUS_BUSY, "STATUS_BUSY") 
-#            print
+            if self.__isScanning and not(self.bMotorOn):
+                self.powerOff()
     def isUserInRoom(self):
         # (ParPort.SELECT == true) == weißes Kabel == Benutzer in Schleuse
         return self.__bConnected or not(self.ParPort.getStatusLine(avg.STATUS_SELECT))
@@ -209,6 +234,8 @@ class MessageArea:
                     Img = Player.getElementByID(Image[i+1])
                     if not(Img == None):
                         Img.opacity = 0
+                    if type(Img) == type(avg.Video()):
+                        Img.stop()
         for ID in ["reiter5", "reiter6", "reiter7",
                 "reiter5_weiss", "reiter6_weiss", "reiter7_weiss"]:
             Player.getElementByID(ID).opacity = 0
@@ -216,29 +243,31 @@ class MessageArea:
             Player.clearInterval(self.__TimeoutID)
 
     def showNextLine(self):
-        def showImage(Line, ID):
+        def showImage(Line, ID, Phase):
             if not(ID == ""):
                 Image = Player.getElementByID(ID)
                 if not(Image == None):
-                    if self.__Phase in [0,2]:
+                    if Phase in [0,2]:
                         Image.y = Player.getElementByID("line"+str(Line)).y
                     else:
                         Image.y = Player.getElementByID("line"+str(Line+1)).y
                     Image.opacity = 1
+                    if type(Image) == type(avg.Video()):
+                        Image.y += 2
             self.__TimeoutID = 0
         if self.__Phase == 0:
             numLines = len(self.__TextElements[self.__CurImage].Text)
             curReiterID = "reiter"+str(numLines+1)
-            showImage(self.__ImageIDs[self.__CurImage][0], curReiterID)
+            showImage(self.__ImageIDs[self.__CurImage][0], curReiterID, 0)
             self.__CurImage+=1
             if self.__CurImage == len(self.__ImageIDs):
                 self.__Phase = 1
                 self.__CurImage = 0
         elif self.__Phase == 1:
             curImageID = self.__ImageIDs[self.__CurImage]
-            showImage(curImageID[0], curImageID[1])
+            showImage(curImageID[0], curImageID[1], 1)
             self.__TimeoutID = Player.setTimeout(100, 
-                    lambda: showImage(curImageID[0], curImageID[2]))
+                    lambda: showImage(curImageID[0], curImageID[2], 1))
             self.__CurImage+=1
             if self.__CurImage == len(self.__ImageIDs):
                 self.__Phase = 2
@@ -249,7 +278,7 @@ class MessageArea:
                 if ImageID[0] == self.__CurLine:
                     numLines = len(self.__TextElements[self.__CurImage].Text)
                     curReiterID = "reiter"+str(numLines+1)+"_weiss"
-                    showImage(self.__ImageIDs[self.__CurImage][0], curReiterID)
+                    showImage(self.__ImageIDs[self.__CurImage][0], curReiterID, 2)
                     Image = Player.getElementByID(self.__ImageIDs[self.__CurImage][2])
                     if type(Image) == type(avg.Video()):
                         Image.play()
@@ -622,7 +651,6 @@ class HandscanAbgebrochenMover:
 
 
 class KoerperscanMover:
-    # TODO: Stop on mouseup
     def __startVideo(self):
         Node = Player.getElementByID("koerperscan")
         Node.opacity=1
@@ -686,7 +714,6 @@ class KoerperscanMover:
         MessageArea.clear()
         self.__stopVideo()
         global Scanner
-        Player.setTimeout(12000,  lambda: Scanner.powerOff())
 
 
 class WeitergehenMover:
@@ -721,7 +748,7 @@ def onFrame():
     CurrentMover.onFrame()
     global LastMovementTime
     if (Scanner.isUserInRoom() or Scanner.isUserInFrontOfScanner() or 
-            not(Scanner.isScannerConnected)):
+            not(Scanner.isScannerConnected())):
         LastMovementTime = time.time()
     if not(Status == LEER) and time.time()-LastMovementTime > EMPTY_TIMEOUT:
         changeMover(LeerMover())
@@ -741,9 +768,9 @@ def onMouseDown():
     LastMovementTime = time.time()
     global bMouseDown
     bMouseDown = 1
-    if (Status == LEER):
+    if Status == LEER:
         changeMover(UnbenutztMover())
-    if (Status in [UNBENUTZT, UNBENUTZT_AUFFORDERUNG, AUFFORDERUNG]):
+    if Status in [UNBENUTZT, UNBENUTZT_AUFFORDERUNG, AUFFORDERUNG]:
         changeMover(HandscanMover())
 
 def onMouseUp():
@@ -751,9 +778,8 @@ def onMouseUp():
     LastMovementTime = time.time()
     global bMouseDown
     bMouseDown = 0
-    if (Status == HANDSCAN):
+    if Status in [HANDSCAN, KOERPERSCAN]:
         global Scanner
-        Scanner.powerOff()
         changeMover(HandscanAbgebrochenMover())
     elif (Status == WEITERGEHEN):
         changeMover(UnbenutztMover())
