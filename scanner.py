@@ -3,7 +3,7 @@
 
 # TODO:
 # - 220 V-Lampen (code, real life)
-# - FremdkÃ¶rper, Alarmsequenz
+# - Fremdkörper, Alarmsequenz
 # - Ablaufbalken unten, Warnicon, Willkommenicon etc.
 # - Test Bewegungsmelder
 # - Mehr Audio
@@ -31,7 +31,7 @@ def playSound(Filename):
 
 def changeMover(NewMover):
     global CurrentMover
-    CurrentMover.onStop()
+    CurrentMover.onStop(NewMover)
     CurrentMover = NewMover
     CurrentMover.onStart()
     Log.trace(Log.APP, "Mover: "+str(Status))
@@ -76,12 +76,12 @@ class BodyScanner:
             Log.trace("Body scanner move init")
         def moveInitDone(self):
             self.__setDataLine(avg.PARPORTDATA0, 0)
+            self.__isScanning = 1
             Log.trace("Body scanner move init done")
         if self.__bConnected:
             self.__powerOn();
             Player.setTimeout(500, moveInit())
             Player.setTimeout(2500, moveInitDone()) 
-            self.__isScanning = 1
     def poll(self):
         def printPPLine(line, name):
             print name,
@@ -121,7 +121,7 @@ class BodyScanner:
             if self.__isScanning and not(self.bMotorOn):
                 self.powerOff()
     def isUserInRoom(self):
-        # (ParPort.SELECT == true) == weiÃŸes Kabel == Benutzer in Schleuse
+        # (ParPort.SELECT == true) == weißes Kabel == Benutzer in Schleuse
         return self.__bConnected or not(self.ParPort.getStatusLine(avg.STATUS_SELECT))
     def isUserInFrontOfScanner(self):
         return self.__bConnected and not(self.ParPort.getStatusLine(avg.STATUS_ERROR))
@@ -254,6 +254,8 @@ class MessageArea:
                     Image.opacity = 1
                     if type(Image) == type(avg.Video()):
                         Image.y += 2
+                        Image.play()
+                        Player.setTimeout(10, lambda: Image.pause())
             self.__TimeoutID = 0
         if self.__Phase == 0:
             numLines = len(self.__TextElements[self.__CurImage].Text)
@@ -336,7 +338,7 @@ class LeerMover:
         subprocess.call(["xset", "dpms", "force", "suspend"])
     def onFrame(self):
         pass
-    def onStop(self):
+    def onStop(self, NewMover):
         ConradRelais.setAmbientLight(1)
         subprocess.call(["xset", "dpms", "force", "on"])
 
@@ -369,7 +371,7 @@ class UnbenutztMover:
             if now-self.__LastUserTime > 20:
                 changeMover(Unbenutzt_AufforderungMover())
                 self.__LastUserTime = now
-    def onStop(self):
+    def onStop(self, NewMover):
         if not Scanner.isScannerConnected:
                 Player.clearInterval(self.TimeoutID)
         
@@ -411,7 +413,7 @@ class Unbenutzt_AufforderungMover:
             if (BottomRotator.CurIdleTriangle == 12):
                 BottomRotator.CurIdleTriangle = 0
 
-    def onStop(self): 
+    def onStop(self, NewMover): 
         for i in range(12):
             if (i != 0 and i != 6): 
                 anim.fadeOut(Player, "idle"+str(i), 300)
@@ -443,7 +445,7 @@ class AufforderungMover:
         Player.getElementByID("idle0").opacity = self.curTriOpacity
         Player.getElementByID("idle6").opacity = self.curTriOpacity
 
-    def onStop(self):
+    def onStop(self, NewMover):
         Player.clearInterval(self.StopTimeoutID)
         anim.fadeOut(Player, "aufforderung_bottom", 300)
         anim.fadeOut(Player, "aufforderung_top", 300)
@@ -561,7 +563,7 @@ class HandscanMover:
                 Scanner.powerOff()
             self.ScanningBottomNode.y -= 2.5 
     
-    def onStop(self):
+    def onStop(self, NewMover):
         def setLine1Font():
             Player.getElementByID("line1").font="Arial"
         Player.getElementByID("hand"+str(self.CurHand)).opacity=0.0
@@ -609,7 +611,7 @@ class HandscanErkanntMover:
         global LastMovementTime
         LastMovementTime = time.time()
 
-    def onStop(self):
+    def onStop(self, NewMover):
         Player.clearInterval(self.StopTimeoutID)
         anim.fadeOut(Player, "willkommen_text", 500)
         anim.fadeOut(Player, "green_screen", 500)
@@ -643,6 +645,7 @@ class HandscanAbgebrochenMover:
         Player.getElementByID("idle").opacity = 1
         Player.getElementByID("auflage_background").opacity = 1
         ConradRelais.setAlarmLight(1)
+        ConradRelais.setAmbientLight(0)
 
     def onFrame(self): 
         global LastMovementTime
@@ -653,9 +656,10 @@ class HandscanAbgebrochenMover:
             changeMover(UnbenutztMover())
         self.CurFrame += 1
 
-    def onStop(self): 
+    def onStop(self, NewMover): 
         MessageArea.clear()
         ConradRelais.setAlarmLight(0)
+        ConradRelais.setAmbientLight(1)
 
 class KoerperscanMover:
     def __startVideo(self):
@@ -694,7 +698,6 @@ class KoerperscanMover:
             ]
         self.CurFrame = 0
         global Scanner
-        Scanner.startScan()
 
     def onStart(self): 
         MessageArea.calcTextPositions(self.TextElements, "CDF1C8", "FFFFFF")
@@ -702,26 +705,83 @@ class KoerperscanMover:
         self.__startVideo()
 
     def onFrame(self):
+        def __done():
+#            if random.random() < 0.5:
+#                changeMover(HandscanErkanntMover())
+#            else:
+                changeMover(FremdkoerperMover())
         global LastMovementTime
         LastMovementTime = time.time()
         if self.CurFrame%6 == 0:
             MessageArea.showNextLine()
+        if self.CurFrame == 2*30:
+            Scanner.startScan()
         if Scanner.isScannerConnected():
             if Scanner.isMovingDown():
-                changeMover(HandscanErkanntMover())
+                __done()
             if self.CurFrame == 20*30:
-                changeMover(HandscanErkanntMover())
-                Scanner.powerOff()
+                __done()
         else:
             if self.CurFrame == 8*30:
-                changeMover(HandscanErkanntMover())
+                __done()
         self.CurFrame += 1
 
-    def onStop(self): 
-        MessageArea.clear()
+    def onStop(self, NewMover):
+        if not (type(NewMover) == type(FremdkoerperMover())):
+            MessageArea.clear()
         self.__stopVideo()
         global Scanner
 
+class FremdkoerperMover:
+    def __startVideo(self):
+        Node = Player.getElementByID("koerperscan_rueckwaerts")
+        Node.opacity=1
+        Node.play()
+    def __stopVideo(self):
+        Node = Player.getElementByID("koerperscan_rueckwaerts")
+        Node.pause()
+    def __init__(self):
+        global Status
+        Status = FREMDKOERPER
+        self.CurFrame = 0
+
+    def onStart(self):
+        self.__startVideo()
+        playSound("Beep1.wav")
+        Player.getElementByID("overlay").opacity=0.8
+
+    def onFrame(self):
+        if self.CurFrame == 50:
+            self.__stopVideo()
+            Node = Player.getElementByID("fremdkoerper_region")
+            Node.opacity=1
+            Node.x=90
+            Node.y=300
+            playSound("Beep1.wav")
+        if self.CurFrame == 80:
+            Player.getElementByID("overlay_streifen").opacity=1
+            Player.getElementByID("achtung").opacity=1
+            Player.getElementByID("implantat").opacity=1
+            Player.getElementByID("fremdkoerper_titel").opacity=1
+            Player.getElementByID("fremdkoerper_text").opacity=1
+#        if self.CurFrame == 200:
+#            if (bMouseDown):
+#                changeMover(WeitergehenMover())
+#            else:
+#                changeMover(UnbenutztMover())
+        self.CurFrame += 1
+
+    def onStop(self, NewMover):
+        Node = Player.getElementByID("koerperscan_rueckwaerts")
+        Node.opacity=0
+        Player.getElementByID("fremdkoerper_region").opacity=0
+        Player.getElementByID("overlay").opacity=0
+        Player.getElementByID("overlay_streifen").opacity=0
+        Player.getElementByID("achtung").opacity=0
+        Player.getElementByID("implantat").opacity=0
+        Player.getElementByID("fremdkoerper_titel").opacity=0
+        Player.getElementByID("fremdkoerper_text").opacity=0
+        MessageArea.clear()
 
 class WeitergehenMover:
     def __init__(self):
@@ -746,7 +806,7 @@ class WeitergehenMover:
             playSound("weiterge.wav")
         self.CurFrame += 1
 
-    def onStop(self):
+    def onStop(self, NewMover):
         MessageArea.clear()
 
 LastMovementTime = time.time()
@@ -806,9 +866,9 @@ Player = avg.Player()
 Log = avg.Logger.get()
 
 LEER, UNBENUTZT, UNBENUTZT_AUFFORDERUNG, AUFFORDERUNG, HANDSCAN, HANDSCAN_ABGEBROCHEN, \
-HANDSCAN_ERKANNT, AUFFORDERUNG_KOERPERSCAN, KOERPERSCAN, KOERPERSCAN_ERKANNT, \
+HANDSCAN_ERKANNT, AUFFORDERUNG_KOERPERSCAN, KOERPERSCAN, FREMDKOERPER, KOERPERSCAN_ERKANNT, \
 WEITERGEHEN, ALARM \
-= range(12)
+= range(13)
 
 bDebug = not(os.getenv('CLEUSE_DEPLOY'))
 if (bDebug):
