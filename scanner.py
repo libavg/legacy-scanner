@@ -121,7 +121,7 @@ class BodyScanner:
             if self.__isScanning and not(self.bMotorOn):
                 self.powerOff()
     def isUserInRoom(self):
-        # (ParPort.SELECT == true) == weiﬂes Kabel == Benutzer in Schleuse
+        # (ParPort.SELECT == true) == wei√ües Kabel == Benutzer in Schleuse
         return self.__bConnected or not(self.ParPort.getStatusLine(avg.STATUS_SELECT))
     def isUserInFrontOfScanner(self):
         return self.__bConnected and not(self.ParPort.getStatusLine(avg.STATUS_ERROR))
@@ -896,7 +896,7 @@ WEITERGEHEN, ALARM \
 
 bDebug = not(os.getenv('CLEUSE_DEPLOY'))
 if (bDebug):
-    Player.setResolution(0, 512, 0, 0) 
+#    Player.setResolution(0, 512, 0, 0) 
     Log.setCategories(Log.APP |
                       Log.WARNING | 
                       Log.PROFILE |
