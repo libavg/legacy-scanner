@@ -63,7 +63,7 @@
         <image id="mate" x="19" y="114" opacity="0" 
                 href="medien/10_fremdkoerper/icon_mate.tif"/>
         <words id="fremdkoerper_titel" x="146" y="33" width="250" parawidth="220" opacity="0"
-                font="Eurostile" size="18" linespacing="-5" text="fremdcörper identifiziert"/>
+                font="Eurostile" size="18" linespacing="-5" text="fremdcÃ¶rper identifiziert"/>
         <words id="fremdkoerper_text" x="146" y="103" linespacing="3" width="250" 
                 parawidth="220" opacity="0"
                 text="Bionisches Implantat entdeckt-----------------------------"/>
