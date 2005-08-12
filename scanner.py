@@ -53,6 +53,7 @@ class BodyScanner:
         self.lastMotorOnTime = time.time()
         self.lastMotorDirTime = time.time()
         self.__isScanning = 0
+        self.__PowerTimeoutID = 0
     def __powerOn(self):
         if self.__bConnected:
             Log.trace(Log.APP, "Body scanner power on")
@@ -64,24 +65,25 @@ class BodyScanner:
             Log.trace(Log.APP, "Body scanner power off")
             self.__setDataLine(avg.PARPORTDATA1, 0)
             self.__setDataLine(avg.PARPORTDATA2, 0)
-            Player.clearTimeout(self.__PowerTimeoutID)
+            if self.__PowerTimeoutID:
+                Player.clearInterval(self.__PowerTimeoutID)
             self.__isScanning = 0
     def disable(self):
         Log.trace(Log.APP, "Body scanner not deactivating by itself - disabling.")
         powerOff()
         self.__bConnected = 0
     def startScan(self):
-        def moveInit(self):
+        def moveInit():
             self.__setDataLine(avg.PARPORTDATA0, 1)
-            Log.trace("Body scanner move init")
-        def moveInitDone(self):
+            Log.trace(Log.APP, "Body scanner move init")
+        def moveInitDone():
             self.__setDataLine(avg.PARPORTDATA0, 0)
             self.__isScanning = 1
-            Log.trace("Body scanner move init done")
+            Log.trace(Log.APP, "Body scanner move init done")
         if self.__bConnected:
             self.__powerOn();
-            Player.setTimeout(500, moveInit())
-            Player.setTimeout(2500, moveInitDone()) 
+            Player.setTimeout(500, moveInit)
+            Player.setTimeout(2500, moveInitDone) 
     def poll(self):
         def printPPLine(line, name):
             print name,
@@ -89,25 +91,29 @@ class BodyScanner:
                 print ": off",
             else:
                 print ":  on",
+        def safeGetSignal(bLastValue, Line):
+            bNewValue = self.ParPort.getStatusLine(Line)
+            if not (bNewValue == bLastValue):
+                time.sleep(0.01)
+                bNewerValue = self.ParPort.getStatusLine(Line)
+                if not(bNewerValue == bNewValue):
+                    Log.trace(Log.APP, "Body scanner line bouncing.")
+                return bNewerValue
+            else:
+                return bLastValue
         if self.__bConnected:
-            bMotorDir = self.ParPort.getStatusLine(avg.STATUS_ACK)
-            bMotorOn = self.ParPort.getStatusLine(avg.STATUS_BUSY)
+            bMotorDir = safeGetSignal(self.bMotorDir, avg.STATUS_ACK)
+            bMotorOn = safeGetSignal(self.bMotorOn, avg.STATUS_BUSY)
             if bMotorOn != self.bMotorOn:
                 if bMotorOn:
                     Log.trace(Log.APP, "Body scanner motor on signal.")
                 else:
                     Log.trace(Log.APP, "Body scanner motor off signal.")
-                if time.time() - self.lastMotorOnTime < 1:
-                    Log.trace(Log.WARNING, "Body scanner motor on bouncing?")
-                self.lastMotorOnTime = time.time();
             if bMotorDir != self.bMotorDir:
                 if bMotorDir:
                     Log.trace(Log.APP, "Body scanner moving down signal.")
                 else:
                     Log.trace(Log.APP, "Body scanner moving up signal.")
-                if time.time() - self.lastMotorDirTime < 1:
-                    Log.trace(Log.WARNING, "Body scanner motor dir bouncing?")
-                self.lastMotorDirTime = time.time();
             if bMotorDir != self.bMotorDir or bMotorOn != self.bMotorOn:
                 if not(bMotorOn):
                     Log.trace(Log.APP, "    --> Motor is off.")
@@ -490,7 +496,7 @@ class HandscanMover:
         self.ScanFrames = 0
         self.ScanningBottomNode = Player.getElementByID("scanning_bottom")
         global Scanner
-        Player.setInterval(200, Scanner.poll)
+        Player.setInterval(100, Scanner.poll)
 
     def onStart(self): 
         anim.animateAttr(Player, "warten", "x", 178, 620, 600)
@@ -588,6 +594,7 @@ class HandscanErkanntMover:
         global Status
         Status = HANDSCAN_ERKANNT
         self.WillkommenNode = Player.getElementByID("willkommen_text")
+        MessageArea.clear()
 
     def onStart(self):
         def newMover():
@@ -622,6 +629,9 @@ class HandscanAbgebrochenMover:
     def __init__(self):
         global Status
         Status = HANDSCAN_ABGEBROCHEN
+        MessageArea.clear()
+
+    def onStart(self):
         self.TextElements = [
                 TextElement("vorgang abgebrochen", "", "", # warn_icon
                     [ "Extremität zu früh entfernt",
@@ -635,8 +645,6 @@ class HandscanAbgebrochenMover:
             ]
         self.CurFrame = 0
         self.WartenNode = Player.getElementByID("warten")
-
-    def onStart(self):
         MessageArea.calcTextPositions(self.TextElements, "F69679", "FA3C09")
         playSound("Beep2.wav")  
         self.WartenNode.opacity = 1
@@ -703,19 +711,18 @@ class KoerperscanMover:
         MessageArea.calcTextPositions(self.TextElements, "CDF1C8", "FFFFFF")
         playSound("stehenbl.wav")
         self.__startVideo()
+        Scanner.startScan()
 
     def onFrame(self):
         def __done():
-#            if random.random() < 0.5:
-#                changeMover(HandscanErkanntMover())
-#            else:
+            if random.random() < 0.5:
+                changeMover(HandscanErkanntMover())
+            else:
                 changeMover(FremdkoerperMover())
         global LastMovementTime
         LastMovementTime = time.time()
-        if self.CurFrame%6 == 0:
+        if self.CurFrame%9 == 0:
             MessageArea.showNextLine()
-        if self.CurFrame == 2*30:
-            Scanner.startScan()
         if Scanner.isScannerConnected():
             if Scanner.isMovingDown():
                 __done()
@@ -727,10 +734,8 @@ class KoerperscanMover:
         self.CurFrame += 1
 
     def onStop(self, NewMover):
-        if not (type(NewMover) == type(FremdkoerperMover())):
-            MessageArea.clear()
+        print("stop bodyscan")
         self.__stopVideo()
-        global Scanner
 
 class FremdkoerperMover:
     def __startVideo(self):
@@ -870,7 +875,7 @@ def onMouseUp():
     global bMouseDown
     bMouseDown = 0
     if Status in [HANDSCAN, KOERPERSCAN]:
-        global Scanner
+        print "MouseUp, HandscanAbgebrochen"
         changeMover(HandscanAbgebrochenMover())
     elif (Status == WEITERGEHEN):
         changeMover(UnbenutztMover())
