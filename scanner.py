@@ -128,7 +128,8 @@ class BodyScanner:
                 self.powerOff()
     def isUserInRoom(self):
         # (ParPort.SELECT == true) == weißes Kabel == Benutzer in Schleuse
-        return self.__bConnected or not(self.ParPort.getStatusLine(avg.STATUS_SELECT))
+        return 1
+#        return self.__bConnected or not(self.ParPort.getStatusLine(avg.STATUS_SELECT))
     def isUserInFrontOfScanner(self):
         return self.__bConnected and not(self.ParPort.getStatusLine(avg.STATUS_ERROR))
     def isMovingDown(self):
