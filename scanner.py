@@ -70,7 +70,7 @@ class BodyScanner:
             self.__isScanning = 0
     def disable(self):
         Log.trace(Log.APP, "Body scanner not deactivating by itself - disabling.")
-        powerOff()
+        self.powerOff()
         self.__bConnected = 0
     def startScan(self):
         def moveInit():
