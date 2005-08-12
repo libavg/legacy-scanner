@@ -129,9 +129,6 @@ class BodyScanner:
                         Log.trace(Log.APP, "    -> Moving up.")
             self.bMotorOn = bMotorOn
             self.bMotorDir = bMotorDir
-            if self.__isMovingDown and not(bMotorDir):
-                # Moving up again - this shouldn't happen
-                self.powerOff()
             if self.__isScanning and not(self.bMotorOn):
                 self.powerOff()
     def isUserInRoom(self):
