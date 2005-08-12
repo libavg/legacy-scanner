@@ -87,7 +87,11 @@ class BodyScanner:
             Log.trace(Log.APP, "Body scanner move init done")
         if self.__bConnected:
             self.__powerOn();
-            Player.setTimeout(500, moveInit)
+            Player.setTimeout(400, moveInit)
+            Player.setTimeout(800, moveInit)
+            Player.setTimeout(1200, moveInit)
+            Player.setTimeout(1600, moveInit)
+            Player.setTimeout(2000, moveInit)
             Player.setTimeout(2500, moveInitDone) 
     def poll(self):
         def printPPLine(line, name):
