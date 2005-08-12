@@ -54,6 +54,7 @@ class BodyScanner:
         self.lastMotorDirTime = time.time()
         self.__isScanning = 0
         self.__PowerTimeoutID = 0
+        self.__DeBounceIntervalID = 0
     def __powerOn(self):
         if self.__bConnected:
             Log.trace(Log.APP, "Body scanner power on")
@@ -68,6 +69,8 @@ class BodyScanner:
             if self.__PowerTimeoutID:
                 Player.clearInterval(self.__PowerTimeoutID)
             self.__isScanning = 0
+            if self.__DeBounceIntervalID:
+                Player.clearInterval(self.__DeBounceIntervalID)
     def disable(self):
         Log.trace(Log.APP, "Body scanner not deactivating by itself - disabling.")
         self.powerOff()
@@ -78,6 +81,8 @@ class BodyScanner:
             Log.trace(Log.APP, "Body scanner move init")
         def moveInitDone():
             self.__setDataLine(avg.PARPORTDATA0, 0)
+            self.__DeBounceIntervalID = Player.setInterval(
+                    200, lambda: self.__setDataLine(avg.PARPORTDATA0, 0))
             self.__isScanning = 1
             Log.trace(Log.APP, "Body scanner move init done")
         if self.__bConnected:
