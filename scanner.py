@@ -566,8 +566,6 @@ class HandscanMover:
 #                    changeMover(KoerperscanMover())
 #                else:
 #                    changeMover(HandscanErkanntMover())
-                global Scanner
-                Scanner.powerOff()
             self.ScanningBottomNode.y -= 2.5 
     
     def onStop(self, NewMover):
