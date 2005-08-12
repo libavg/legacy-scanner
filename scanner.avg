@@ -62,9 +62,9 @@
                 href="medien/10_fremdkoerper/icon_flugzeug.tif"/>
         <image id="mate" x="19" y="114" opacity="0" 
                 href="medien/10_fremdkoerper/icon_mate.tif"/>
-        <words id="fremdkoerper_titel" x="146" y="37" opacity="0"
+        <words id="fremdkoerper_titel" x="146" y="37" parawidth="200" opacity="0"
                 text="fremdcörper identifiziert"/>
-        <words id="fremdkoerper_text" x="146" y="103" opacity="0"
+        <words id="fremdkoerper_text" x="146" y="103" parawidth="200" opacity="0"
                 text="Bionisches Implantat entdeckt"/>
     </div>
     <image id="willkommen_text" x="607" y="675" width="330" height="13"

@@ -749,9 +749,31 @@ class FremdkoerperMover:
         self.__startVideo()
         playSound("Beep1.wav")
         Player.getElementByID("overlay").opacity=0.8
+        WhichFremdkoerper = int(math.floor(random.random()*3))
+        Log.trace(Log.APP, "Fremdkoerper: "+str(WhichFremdkoerper))
+        self.__Region=Player.getElementByID("fremdkoerper_region")
+        self.__Text=Player.getElementByID("fremdkoerper_text")
+        if WhichFremdkoerper==0:
+            self.__Icon=Player.getElementByID("flugzeug")
+            self.__Region.x=90
+            self.__Region.y=300
+            self.__Text.text="Bitte begeben sie sich in den bereich social engineering."
+            self.__StopFrame=50
+        elif WhichFremdkoerper==1:
+            self.__Icon=Player.getElementByID("implantat")
+            self.__Region.x=140
+            self.__Region.y=280
+            self.__Text.text="Bionisches Implantat entdeckt."
+            self.__StopFrame=15
+        else:
+            self.__Icon=Player.getElementByID("mate")
+            self.__Region.x=90
+            self.__Region.y=300
+            self.__Text.text="Glashaltiges Gebilde im Magen. Bitte begeben sie sich umgehend zur Biowaffenentsorgungsstation auf Ebene 5b."
+            self.__StopFrame=50
 
     def onFrame(self):
-        if self.CurFrame == 50:
+        if self.CurFrame == self.__StopFrame:
             self.__stopVideo()
             Node = Player.getElementByID("fremdkoerper_region")
             Node.opacity=1
@@ -761,14 +783,14 @@ class FremdkoerperMover:
         if self.CurFrame == 80:
             Player.getElementByID("overlay_streifen").opacity=1
             Player.getElementByID("achtung").opacity=1
-            Player.getElementByID("implantat").opacity=1
+            self.__Icon.opacity=1
             Player.getElementByID("fremdkoerper_titel").opacity=1
             Player.getElementByID("fremdkoerper_text").opacity=1
-#        if self.CurFrame == 200:
-#            if (bMouseDown):
-#                changeMover(WeitergehenMover())
-#            else:
-#                changeMover(UnbenutztMover())
+        if self.CurFrame == 300:
+            if (bMouseDown):
+                changeMover(WeitergehenMover())
+            else:
+                changeMover(UnbenutztMover())
         self.CurFrame += 1
 
     def onStop(self, NewMover):
@@ -778,10 +800,12 @@ class FremdkoerperMover:
         Player.getElementByID("overlay").opacity=0
         Player.getElementByID("overlay_streifen").opacity=0
         Player.getElementByID("achtung").opacity=0
-        Player.getElementByID("implantat").opacity=0
+        self.__Icon.opacity=0
         Player.getElementByID("fremdkoerper_titel").opacity=0
         Player.getElementByID("fremdkoerper_text").opacity=0
         MessageArea.clear()
+        Node = Player.getElementByID("koerperscan_rueckwaerts")
+        Node.stop()
 
 class WeitergehenMover:
     def __init__(self):
