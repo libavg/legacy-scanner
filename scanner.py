@@ -124,6 +124,9 @@ class BodyScanner:
                         Log.trace(Log.APP, "    -> Moving up.")
             self.bMotorOn = bMotorOn
             self.bMotorDir = bMotorDir
+            if self.__isMovingDown and not(bMotorDir):
+                # Moving up again - this shouldn't happen
+                self.powerOff()
             if self.__isScanning and not(self.bMotorOn):
                 self.powerOff()
     def isUserInRoom(self):
@@ -775,6 +778,8 @@ class FremdkoerperMover:
             self.__Region.y=300
             self.__Text.text="Glashaltiges Gebilde im Magen. Bitte begeben sie sich umgehend zur Biowaffenentsorgungsstation auf Ebene 5b."
             self.__StopFrame=50
+        ConradRelais.setAlarmLight(1)
+        ConradRelais.setAmbientLight(0)
 
     def onFrame(self):
         if self.CurFrame == self.__StopFrame:
@@ -810,6 +815,8 @@ class FremdkoerperMover:
         MessageArea.clear()
         Node = Player.getElementByID("koerperscan_rueckwaerts")
         Node.stop()
+        ConradRelais.setAlarmLight(0)
+        ConradRelais.setAmbientLight(1)
 
 class WeitergehenMover:
     def __init__(self):
