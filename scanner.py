@@ -119,9 +119,9 @@ class BodyScanner:
                     Log.trace(Log.APP, "    --> Motor is off.")
                 else:
                     if bMotorDir:
-                        Log.trace(Log.APP, "    -> Moving up.")
-                    else:
                         Log.trace(Log.APP, "    -> Moving down.")
+                    else:
+                        Log.trace(Log.APP, "    -> Moving up.")
             self.bMotorOn = bMotorOn
             self.bMotorDir = bMotorDir
             if self.__isScanning and not(self.bMotorOn):
