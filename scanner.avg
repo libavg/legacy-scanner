@@ -162,6 +162,10 @@
       <image id="rahmen_5x4" x="0" opacity="0" z="3" href="medien/rahmen_5x4.tif"/>
       <image id="rahmen_4x4" x="33" opacity="0" z="3" href="medien/rahmen_4x4.tif"/>
     </div>
+    <div id="status_icons" z="5">
+      <image id="warn_icon_1" x="850" y="650" opacity="1" href="medien/warn_icon.tif"/>
+      <image id="warn_icon_2" x="920" y="650" opacity="1" href="medien/warn_icon_orange.tif"/>
+    </div>
   </div>
   <div id="auflage" x="0" y="768">
     <image id="auflage_background" x="0" y="0" z="0" 

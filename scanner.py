@@ -135,10 +135,17 @@ class BodyScanner:
             self.bMotorDir = bMotorDir
             if self.__isScanning and not(self.bMotorOn):
                 self.powerOff()
+        if self.ParPort.getStatusLine(avg.STATUS_SELECT):
+            Player.getElementByID("warn_icon_1").opacity=0.5;
+        else:
+            Player.getElementByID("warn_icon_1").opacity=0;
+        if self.ParPort.getStatusLine(avg.STATUS_ERROR):
+            Player.getElementByID("warn_icon_2").opacity=0.5;
+        else:
+            Player.getElementByID("warn_icon_2").opacity=0;
     def isUserInRoom(self):
         # (ParPort.SELECT == true) == weißes Kabel == Benutzer in Schleuse
-        return 1
-#        return self.__bConnected or not(self.ParPort.getStatusLine(avg.STATUS_SELECT))
+        return self.__bConnected or not(self.ParPort.getStatusLine(avg.STATUS_SELECT))
     def isUserInFrontOfScanner(self):
         return self.__bConnected and not(self.ParPort.getStatusLine(avg.STATUS_ERROR))
     def isMovingDown(self):
@@ -505,8 +512,6 @@ class HandscanMover:
         self.CurHand = 0
         self.ScanFrames = 0
         self.ScanningBottomNode = Player.getElementByID("scanning_bottom")
-        global Scanner
-        Player.setInterval(100, Scanner.poll)
 
     def onStart(self): 
         anim.animateAttr(Player, "warten", "x", 178, 620, 600)
@@ -913,7 +918,7 @@ WEITERGEHEN, ALARM \
 
 bDebug = not(os.getenv('CLEUSE_DEPLOY'))
 if (bDebug):
-#    Player.setResolution(0, 512, 0, 0) 
+    Player.setResolution(0, 512, 0, 0) 
     Log.setCategories(Log.APP |
                       Log.WARNING | 
                       Log.PROFILE |
@@ -941,6 +946,7 @@ Player.loadFile("scanner.avg")
 Player.setInterval(10, onFrame)
 
 Scanner = BodyScanner() 
+Player.setInterval(100, Scanner.poll)
 ConradRelais = ConradRelais()
 LastSignalHandler = signal.signal(signal.SIGHUP, signalHandler)
 LastSignalHandler = signal.signal(signal.SIGINT, signalHandler)
