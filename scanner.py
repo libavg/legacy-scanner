@@ -51,11 +51,10 @@ class BodyScanner:
             self.ParPort.setControlLine(avg.CONTROL_STROBE, 0)
         for i in range(8):
             if (self.__DataLineStatus & 2**i) != 0:
-                Player.getElementByID("line_icon_"+str(i+1)).opacity = 0.8
-            else:
                 Player.getElementByID("line_icon_"+str(i+1)).opacity = 0.3
+            else:
+                Player.getElementByID("line_icon_"+str(i+1)).opacity = 0.1
     def __setDataLine(self, line, value):
-        print("setDataLine ", line, ", ", value)
         if value:
             self.__DataLineStatus |= line
         else:
@@ -82,7 +81,10 @@ class BodyScanner:
         self.__DataLineStatus = 0
         # Since the relays lose their status due to interference sometimes (often), we need
         # to set the status constantly :-(.
-        Player.setInterval(100, self.__setDataLineStatus)
+        self.__dataLineInterval = Player.setInterval(100, self.__setDataLineStatus)
+    def delete(self):
+        Player.clearInterval(self.__dataLineInterval)
+        powerOff()
     def powerOff(self):
         Log.trace(Log.APP, "Body scanner power off")
         self.__setDataLine(avg.PARPORTDATA1, 0)
@@ -155,13 +157,13 @@ class BodyScanner:
         if self.__isScanning and not(self.bMotorOn):
             self.powerOff()
         if self.ParPort.getStatusLine(avg.STATUS_SELECT):
-            Player.getElementByID("warn_icon_1").opacity=0.5;
+            Player.getElementByID("warn_icon_1").opacity=0.3;
         else:
-            Player.getElementByID("warn_icon_1").opacity=0;
+            Player.getElementByID("warn_icon_1").opacity=0.1;
         if self.ParPort.getStatusLine(avg.STATUS_ERROR):
-            Player.getElementByID("warn_icon_2").opacity=0.5;
+            Player.getElementByID("warn_icon_2").opacity=0.3;
         else:
-            Player.getElementByID("warn_icon_2").opacity=0;
+            Player.getElementByID("warn_icon_2").opacity=0.1;
     def isUserInRoom(self):
         # (ParPort.SELECT == true) == weißes Kabel == Benutzer in Schleuse
         return self.__bConnected or not(self.ParPort.getStatusLine(avg.STATUS_SELECT))
@@ -917,7 +919,7 @@ def signalHandler(signum, frame):
 def cleanup():
     global ConradRelais
     ConradRelais.turnOff()
-    Scanner.powerOff()
+    Scanner.delete()
 
 Player = avg.Player()
 Log = avg.Logger.get()
@@ -980,5 +982,6 @@ CurrentMover.onStart()
 
 try:
     Player.play(30)
+    Scanner.delete()
 finally:
     cleanup()
