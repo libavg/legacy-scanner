@@ -45,6 +45,7 @@ class BodyScanner:
     def __setDataLineStatus(self):
         if self.__bConnected:
             self.ParPort.setControlLine(avg.CONTROL_STROBE, 0)
+            Log.trace(Log.APP, self.__DataLineStatus)
             self.ParPort.setAllDataLines(self.__DataLineStatus)
             self.ParPort.setControlLine(avg.CONTROL_STROBE, 1)
             time.sleep(0.001)
@@ -128,7 +129,7 @@ class BodyScanner:
                 return bNewerValue
             else:
                 return bLastValue
-        bMotorDir = not(safeGetSignal(self.bMotorDir, avg.STATUS_ACK))
+        bMotorDir = safeGetSignal(self.bMotorDir, avg.STATUS_ACK)
         bMotorOn = safeGetSignal(self.bMotorOn, avg.STATUS_BUSY)
         if bMotorOn != self.bMotorOn:
             if bMotorOn:
