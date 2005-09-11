@@ -162,10 +162,6 @@
       <image id="rahmen_5x4" x="0" opacity="0" z="3" href="medien/rahmen_5x4.tif"/>
       <image id="rahmen_4x4" x="33" opacity="0" z="3" href="medien/rahmen_4x4.tif"/>
     </div>
-    <div id="status_icons" z="5">
-      <image id="warn_icon_1" x="850" y="650" opacity="1" href="medien/warn_icon.tif"/>
-      <image id="warn_icon_2" x="920" y="650" opacity="1" href="medien/warn_icon_orange.tif"/>
-    </div>
   </div>
   <div id="auflage" x="0" y="768">
     <image id="auflage_background" x="0" y="0" z="0" 
@@ -217,6 +213,19 @@
           href="medien/03_handscan/auflage_lila.tif"/>
       <image id="auflage_gruen" opacity="0"
           href="medien/05_handscan_erkannt/auflage_gruen.tif"/>
+    </div>
+    <div id="status_icons" x="780" y="600" z="5">
+      <image id="line_icon_1" x="0" y="0" width="15" height="16" opacity="1" href="medien/warn_icon.tif"/>
+      <image id="line_icon_2" x="15" y="0" width="15" height="16" opacity="1" href="medien/warn_icon.tif"/>
+      <image id="line_icon_3" x="31" y="0" width="15" height="16" opacity="1" href="medien/warn_icon.tif"/>
+      <image id="line_icon_4" x="47" y="0" width="15" height="16" opacity="1" href="medien/warn_icon.tif"/>
+      <image id="line_icon_5" x="63" y="0" width="15" height="16" opacity="1" href="medien/warn_icon.tif"/>
+      <image id="line_icon_6" x="79" y="0" width="15" height="16" opacity="1" href="medien/warn_icon.tif"/>
+      <image id="line_icon_7" x="95" y="0" width="15" height="16" opacity="1" href="medien/warn_icon.tif"/>
+      <image id="line_icon_8" x="111" y="0" width="15" height="16" opacity="1" href="medien/warn_icon.tif"/>
+      
+      <image id="warn_icon_1" x="0" y="50" opacity="1" href="medien/warn_icon.tif"/>
+      <image id="warn_icon_2" x="70" y="50" opacity="1" href="medien/warn_icon_orange.tif"/>
     </div>
   </div>
 </avg>

@@ -3,7 +3,7 @@
 
 # TODO:
 # - 220 V-Lampen (code, real life)
-# - Fremdkörper, Alarmsequenz
+# - FremdkÃ¶rper, Alarmsequenz
 # - Ablaufbalken unten, Warnicon, Willkommenicon etc.
 # - Test Bewegungsmelder
 # - Mehr Audio
@@ -37,6 +37,30 @@ def changeMover(NewMover):
     Log.trace(Log.APP, "Mover: "+str(Status))
 
 class BodyScanner:
+    def __powerOn(self):
+        Log.trace(Log.APP, "Body scanner power on")
+        self.__setDataLine(avg.PARPORTDATA1, 1)
+        self.__setDataLine(avg.PARPORTDATA2, 1)
+        self.__PowerTimeoutID = Player.setTimeout(20000, self.disable)
+    def __setDataLineStatus(self):
+        if self.__bConnected:
+            self.ParPort.setControlLine(avg.CONTROL_STROBE, 0)
+            self.ParPort.setAllDataLines(self.__DataLineStatus)
+            self.ParPort.setControlLine(avg.CONTROL_STROBE, 1)
+            time.sleep(0.001)
+            self.ParPort.setControlLine(avg.CONTROL_STROBE, 0)
+        for i in range(8):
+            if (self.__DataLineStatus & 2**i) != 0:
+                Player.getElementByID("line_icon_"+str(i+1)).opacity = 0.8
+            else:
+                Player.getElementByID("line_icon_"+str(i+1)).opacity = 0.3
+    def __setDataLine(self, line, value):
+        print("setDataLine ", line, ", ", value)
+        if value:
+            self.__DataLineStatus |= line
+        else:
+            self.__DataLineStatus &= ~line
+        self.__setDataLineStatus()
     def __init__(self):
         self.ParPort = avg.ParPort()
         self.ParPort.init("")
@@ -55,22 +79,19 @@ class BodyScanner:
         self.__isScanning = 0
         self.__PowerTimeoutID = 0
         self.__DeBounceIntervalID = 0
-    def __powerOn(self):
-        if self.__bConnected:
-            Log.trace(Log.APP, "Body scanner power on")
-            self.__setDataLine(avg.PARPORTDATA1, 1)
-            self.__setDataLine(avg.PARPORTDATA2, 1)
-            self.__PowerTimeoutID = Player.setTimeout(20000, self.disable)
+        self.__DataLineStatus = 0
+        # Since the relays lose their status due to interference sometimes (often), we need
+        # to set the status constantly :-(.
+        Player.setInterval(100, self.__setDataLineStatus)
     def powerOff(self):
-        if self.__bConnected:
-            Log.trace(Log.APP, "Body scanner power off")
-            self.__setDataLine(avg.PARPORTDATA1, 0)
-            self.__setDataLine(avg.PARPORTDATA2, 0)
-            if self.__PowerTimeoutID:
-                Player.clearInterval(self.__PowerTimeoutID)
-            self.__isScanning = 0
-            if self.__DeBounceIntervalID:
-                Player.clearInterval(self.__DeBounceIntervalID)
+        Log.trace(Log.APP, "Body scanner power off")
+        self.__setDataLine(avg.PARPORTDATA1, 0)
+        self.__setDataLine(avg.PARPORTDATA2, 0)
+        if self.__PowerTimeoutID:
+            Player.clearInterval(self.__PowerTimeoutID)
+        self.__isScanning = 0
+        if self.__DeBounceIntervalID:
+            Player.clearInterval(self.__DeBounceIntervalID)
     def disable(self):
         Log.trace(Log.APP, "Body scanner not deactivating by itself - disabling.")
         self.powerOff()
@@ -85,14 +106,13 @@ class BodyScanner:
                     200, lambda: self.__setDataLine(avg.PARPORTDATA0, 0))
             self.__isScanning = 1
             Log.trace(Log.APP, "Body scanner move init done")
-        if self.__bConnected:
-            self.__powerOn();
-            Player.setTimeout(400, moveInit)
-            Player.setTimeout(800, moveInit)
-            Player.setTimeout(1200, moveInit)
-            Player.setTimeout(1600, moveInit)
-            Player.setTimeout(2000, moveInit)
-            Player.setTimeout(2500, moveInitDone) 
+        self.__powerOn();
+        Player.setTimeout(400, moveInit)
+        Player.setTimeout(800, moveInit)
+        Player.setTimeout(1200, moveInit)
+        Player.setTimeout(1600, moveInit)
+        Player.setTimeout(2000, moveInit)
+        Player.setTimeout(2500, moveInitDone) 
     def poll(self):
         def printPPLine(line, name):
             print name,
@@ -110,31 +130,30 @@ class BodyScanner:
                 return bNewerValue
             else:
                 return bLastValue
-        if self.__bConnected:
-            bMotorDir = safeGetSignal(self.bMotorDir, avg.STATUS_ACK)
-            bMotorOn = safeGetSignal(self.bMotorOn, avg.STATUS_BUSY)
-            if bMotorOn != self.bMotorOn:
-                if bMotorOn:
-                    Log.trace(Log.APP, "Body scanner motor on signal.")
-                else:
-                    Log.trace(Log.APP, "Body scanner motor off signal.")
-            if bMotorDir != self.bMotorDir:
+        bMotorDir = safeGetSignal(self.bMotorDir, avg.STATUS_ACK)
+        bMotorOn = safeGetSignal(self.bMotorOn, avg.STATUS_BUSY)
+        if bMotorOn != self.bMotorOn:
+            if bMotorOn:
+                Log.trace(Log.APP, "Body scanner motor on signal.")
+            else:
+                Log.trace(Log.APP, "Body scanner motor off signal.")
+        if bMotorDir != self.bMotorDir:
+            if bMotorDir:
+                Log.trace(Log.APP, "Body scanner moving down signal.")
+            else:
+                Log.trace(Log.APP, "Body scanner moving up signal.")
+        if bMotorDir != self.bMotorDir or bMotorOn != self.bMotorOn:
+            if not(bMotorOn):
+                Log.trace(Log.APP, "    --> Motor is off.")
+            else:
                 if bMotorDir:
-                    Log.trace(Log.APP, "Body scanner moving down signal.")
+                    Log.trace(Log.APP, "    -> Moving down.")
                 else:
-                    Log.trace(Log.APP, "Body scanner moving up signal.")
-            if bMotorDir != self.bMotorDir or bMotorOn != self.bMotorOn:
-                if not(bMotorOn):
-                    Log.trace(Log.APP, "    --> Motor is off.")
-                else:
-                    if bMotorDir:
-                        Log.trace(Log.APP, "    -> Moving down.")
-                    else:
-                        Log.trace(Log.APP, "    -> Moving up.")
-            self.bMotorOn = bMotorOn
-            self.bMotorDir = bMotorDir
-            if self.__isScanning and not(self.bMotorOn):
-                self.powerOff()
+                    Log.trace(Log.APP, "    -> Moving up.")
+        self.bMotorOn = bMotorOn
+        self.bMotorDir = bMotorDir
+        if self.__isScanning and not(self.bMotorOn):
+            self.powerOff()
         if self.ParPort.getStatusLine(avg.STATUS_SELECT):
             Player.getElementByID("warn_icon_1").opacity=0.5;
         else:
@@ -155,15 +174,6 @@ class BodyScanner:
 #        return self.__bConnected and ParPort.getStatusLine(avg.STATUS_BUSY)
     def isScannerConnected(self):
         return self.__bConnected
-    def __setDataLine(self, line, value):
-        self.ParPort.setControlLine(avg.CONTROL_STROBE, 0)
-        if value:
-            self.ParPort.setDataLines(line)
-        else:
-            self.ParPort.clearDataLines(line)
-        self.ParPort.setControlLine(avg.CONTROL_STROBE, 1)
-        time.sleep(0.001);
-        self.ParPort.setControlLine(avg.CONTROL_STROBE, 0)
 
 class TopRotator:
     def rotateAussenIdle(self):
