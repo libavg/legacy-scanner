@@ -50,10 +50,12 @@ class BodyScanner:
             time.sleep(0.001)
             self.ParPort.setControlLine(avg.CONTROL_STROBE, 0)
         for i in range(8):
-            if (self.__DataLineStatus & 2**i) != 0:
-                Player.getElementByID("line_icon_"+str(i+1)).opacity = 0.3
-            else:
-                Player.getElementByID("line_icon_"+str(i+1)).opacity = 0.1
+            icon = Player.getElementByID("line_icon_"+str(i+1))
+            if icon:
+                if (self.__DataLineStatus & 2**i) != 0:
+                    Player.getElementByID("line_icon_"+str(i+1)).opacity = 0.3
+                else:
+                    Player.getElementByID("line_icon_"+str(i+1)).opacity = 0.1
     def __setDataLine(self, line, value):
         if value:
             self.__DataLineStatus |= line
@@ -84,7 +86,7 @@ class BodyScanner:
         self.__dataLineInterval = Player.setInterval(100, self.__setDataLineStatus)
     def delete(self):
         Player.clearInterval(self.__dataLineInterval)
-        powerOff()
+        self.powerOff()
     def powerOff(self):
         Log.trace(Log.APP, "Body scanner power off")
         self.__setDataLine(avg.PARPORTDATA1, 0)
@@ -104,16 +106,10 @@ class BodyScanner:
             Log.trace(Log.APP, "Body scanner move init")
         def moveInitDone():
             self.__setDataLine(avg.PARPORTDATA0, 0)
-            self.__DeBounceIntervalID = Player.setInterval(
-                    200, lambda: self.__setDataLine(avg.PARPORTDATA0, 0))
             self.__isScanning = 1
             Log.trace(Log.APP, "Body scanner move init done")
         self.__powerOn();
         Player.setTimeout(400, moveInit)
-        Player.setTimeout(800, moveInit)
-        Player.setTimeout(1200, moveInit)
-        Player.setTimeout(1600, moveInit)
-        Player.setTimeout(2000, moveInit)
         Player.setTimeout(2500, moveInitDone) 
     def poll(self):
         def printPPLine(line, name):
