@@ -45,11 +45,11 @@ class BodyScanner:
     def __setDataLineStatus(self):
         if self.__bConnected:
             self.ParPort.setControlLine(avg.CONTROL_STROBE, 0)
-            Log.trace(Log.APP, self.__DataLineStatus)
-            self.ParPort.setAllDataLines(self.__DataLineStatus)
+#            Log.trace(Log.APP, str(self.__DataLineStatus))
             self.ParPort.setControlLine(avg.CONTROL_STROBE, 1)
             time.sleep(0.001)
             self.ParPort.setControlLine(avg.CONTROL_STROBE, 0)
+            self.ParPort.setAllDataLines(self.__DataLineStatus)
         for i in range(8):
             icon = Player.getElementByID("line_icon_"+str(i+1))
             if icon:
@@ -80,14 +80,13 @@ class BodyScanner:
         self.lastMotorDirTime = time.time()
         self.__isScanning = 0
         self.__PowerTimeoutID = 0
-        self.__DeBounceIntervalID = 0
         self.__DataLineStatus = 0
         # Since the relays lose their status due to interference sometimes (often), we need
         # to set the status constantly :-(.
         self.__dataLineInterval = Player.setInterval(100, self.__setDataLineStatus)
     def delete(self):
-        Player.clearInterval(self.__dataLineInterval)
         self.powerOff()
+        Player.setTimeout(500, Player.clearInterval(self.__dataLineInterval))
     def powerOff(self):
         Log.trace(Log.APP, "Body scanner power off")
         self.__setDataLine(avg.PARPORTDATA1, 0)
@@ -95,8 +94,6 @@ class BodyScanner:
         if self.__PowerTimeoutID:
             Player.clearInterval(self.__PowerTimeoutID)
         self.__isScanning = 0
-        if self.__DeBounceIntervalID:
-            Player.clearInterval(self.__DeBounceIntervalID)
     def disable(self):
         Log.trace(Log.APP, "Body scanner not deactivating by itself - disabling.")
         self.powerOff()
@@ -138,17 +135,17 @@ class BodyScanner:
                 Log.trace(Log.APP, "Body scanner motor off signal.")
         if bMotorDir != self.bMotorDir:
             if bMotorDir:
-                Log.trace(Log.APP, "Body scanner moving down signal.")
-            else:
                 Log.trace(Log.APP, "Body scanner moving up signal.")
+            else:
+                Log.trace(Log.APP, "Body scanner moving down signal.")
         if bMotorDir != self.bMotorDir or bMotorOn != self.bMotorOn:
             if not(bMotorOn):
                 Log.trace(Log.APP, "    --> Motor is off.")
             else:
                 if bMotorDir:
-                    Log.trace(Log.APP, "    -> Moving down.")
-                else:
                     Log.trace(Log.APP, "    -> Moving up.")
+                else:
+                    Log.trace(Log.APP, "    -> Moving down.")
         self.bMotorOn = bMotorOn
         self.bMotorDir = bMotorDir
         if self.__isScanning and not(self.bMotorOn):
@@ -162,7 +159,7 @@ class BodyScanner:
         else:
             Player.getElementByID("warn_icon_2").opacity=0.1;
     def isUserInRoom(self):
-        # (ParPort.SELECT == true) == weißes Kabel == Benutzer in Schleuse
+        # (ParPort.SELECT == true) == weisses Kabel == Benutzer in Schleuse
         return self.__bConnected or not(self.ParPort.getStatusLine(avg.STATUS_SELECT))
     def isUserInFrontOfScanner(self):
         return 0 
