@@ -128,7 +128,7 @@ class BodyScanner:
                 return bNewerValue
             else:
                 return bLastValue
-        bMotorDir = safeGetSignal(self.bMotorDir, avg.STATUS_ACK)
+        bMotorDir = not(safeGetSignal(self.bMotorDir, avg.STATUS_ACK))
         bMotorOn = safeGetSignal(self.bMotorOn, avg.STATUS_BUSY)
         if bMotorOn != self.bMotorOn:
             if bMotorOn:
