@@ -2,16 +2,13 @@
 # -*- coding: utf-8 -*-
 
 # TODO:
-# - 220 V-Lampen (code, real life)
-# - Fremdkörper, Alarmsequenz
 # - Ablaufbalken unten, Warnicon, Willkommenicon etc.
 # - Test Bewegungsmelder
-# - Mehr Audio
 # Later:
 # - Rotator bewegen.
 # - Stromspar-Strategie
 import sys, os, math, random, subprocess, signal, atexit
-sys.path.append('/usr/local/lib/python2.4/site-packages/avg')
+sys.path.append('/usr/local/lib/python2.4/site-packages/libavg')
 import avg
 import anim
 import time
@@ -707,7 +704,7 @@ class KoerperscanMover:
                   "> Gliedmaße",
                   "Topologie",
                   "Scelettaufbau",
-                  "> Wirbelsäule",
+                  "> WirbelsÃ¤ule",
                   "Organe und Innereien"],
                   "grundton.wav"),
             TextElement("zellen", "zellen", "rahmen_5x4",
@@ -782,7 +779,7 @@ class FremdkoerperMover:
             self.__Icon=Player.getElementByID("flugzeug")
             self.__Region.x=90
             self.__Region.y=300
-            self.__Text.text="Bitte begeben sie sich in den bereich social engineering."
+            self.__Text.text="Bitte begeben sie sich in den Bereich Social construction auf Ebene -1."
             self.__StopFrame=50
         elif WhichFremdkoerper==1:
             self.__Icon=Player.getElementByID("implantat")
