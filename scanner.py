@@ -2,11 +2,11 @@
 # -*- coding: utf-8 -*-
 
 # TODO:
+# - 220 V-Lampen (code, real life)
 # - Ablaufbalken unten, Warnicon, Willkommenicon etc.
-# - Test Bewegungsmelder
-# Later:
+# - Bewegungsmelder, Stromspar-Strategie
 # - Rotator bewegen.
-# - Stromspar-Strategie
+
 import sys, os, math, random, subprocess, signal, atexit
 sys.path.append('/usr/local/lib/python2.4/site-packages/libavg')
 import avg
@@ -42,7 +42,8 @@ class BodyScanner:
     def __setDataLineStatus(self):
         if self.__bConnected:
             self.ParPort.setControlLine(avg.CONTROL_STROBE, 0)
-#            Log.trace(Log.APP, str(self.__DataLineStatus))
+            Log.trace(Log.APP, str(self.__DataLineStatus))
+            self.ParPort.setAllDataLines(self.__DataLineStatus)
             self.ParPort.setControlLine(avg.CONTROL_STROBE, 1)
             time.sleep(0.001)
             self.ParPort.setControlLine(avg.CONTROL_STROBE, 0)
@@ -54,11 +55,37 @@ class BodyScanner:
                     Player.getElementByID("line_icon_"+str(i+1)).opacity = 0.3
                 else:
                     Player.getElementByID("line_icon_"+str(i+1)).opacity = 0.1
+    def __lineToIndex(self, line):
+        if line == avg.PARPORTDATA0:
+            return 1
+        elif line == avg.PARPORTDATA1:
+            return 2
+        elif line == avg.PARPORTDATA2:
+            return 3
+        elif line == avg.PARPORTDATA3:
+            return 4
+        elif line == avg.PARPORTDATA4:
+            return 5 
+        elif line == avg.PARPORTDATA5:
+            return 6
+        elif line == avg.PARPORTDATA6:
+            return 7
+        elif line == avg.PARPORTDATA7:
+            return 8
+        else:
+            return 0
     def __setDataLine(self, line, value):
+        icon = Player.getElementByID("line_icon_"+str(self.__lineToIndex(line)))
         if value:
+            self.ParPort.setDataLines(line)
+            if icon:
+                icon.opacity = 0.3
             self.__DataLineStatus |= line
         else:
-            self.__DataLineStatus &= ~line
+            self.ParPort.clearDataLines(line)
+            if icon:
+                icon.opacity = 0.1
+            self.__DataLineStatus &= not(line)
         self.__setDataLineStatus()
     def __init__(self):
         self.ParPort = avg.ParPort()
@@ -78,12 +105,8 @@ class BodyScanner:
         self.__isScanning = 0
         self.__PowerTimeoutID = 0
         self.__DataLineStatus = 0
-        # Since the relays lose their status due to interference sometimes (often), we need
-        # to set the status constantly :-(.
-        self.__dataLineInterval = Player.setInterval(100, self.__setDataLineStatus)
     def delete(self):
         self.powerOff()
-        Player.setTimeout(500, Player.clearInterval(self.__dataLineInterval))
     def powerOff(self):
         Log.trace(Log.APP, "Body scanner power off")
         self.__setDataLine(avg.PARPORTDATA1, 0)
@@ -779,7 +802,7 @@ class FremdkoerperMover:
             self.__Icon=Player.getElementByID("flugzeug")
             self.__Region.x=90
             self.__Region.y=300
-            self.__Text.text="Bitte begeben sie sich in den Bereich Social construction auf Ebene -1."
+            self.__Text.text="Bitte begeben sie sich in den Bereich Social Construction auf Ebene -1."
             self.__StopFrame=50
         elif WhichFremdkoerper==1:
             self.__Icon=Player.getElementByID("implantat")
