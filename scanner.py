@@ -4,11 +4,13 @@
 # TODO:
 # - 220 V-Lampen (code, real life)
 # - Ablaufbalken unten, Warnicon, Willkommenicon etc.
-# - Bewegungsmelder, Stromspar-Strategie
+# - Test Bewegungsmelder
+# - Mehr Audio
+# Later:
 # - Rotator bewegen.
-
+# - Stromspar-Strategie
 import sys, os, math, random, subprocess, signal, atexit
-sys.path.append('/usr/local/lib/python2.4/site-packages/libavg')
+sys.path.append('/usr/local/lib/python2.4/site-packages/avg')
 import avg
 import anim
 import time
@@ -39,22 +41,22 @@ class BodyScanner:
         self.__setDataLine(avg.PARPORTDATA1, 1)
         self.__setDataLine(avg.PARPORTDATA2, 1)
         self.__PowerTimeoutID = Player.setTimeout(20000, self.disable)
-    def __setDataLineStatus(self):
-        if self.__bConnected:
-            self.ParPort.setControlLine(avg.CONTROL_STROBE, 0)
-            Log.trace(Log.APP, str(self.__DataLineStatus))
-            self.ParPort.setAllDataLines(self.__DataLineStatus)
-            self.ParPort.setControlLine(avg.CONTROL_STROBE, 1)
-            time.sleep(0.001)
-            self.ParPort.setControlLine(avg.CONTROL_STROBE, 0)
-            self.ParPort.setAllDataLines(self.__DataLineStatus)
-        for i in range(8):
-            icon = Player.getElementByID("line_icon_"+str(i+1))
-            if icon:
-                if (self.__DataLineStatus & 2**i) != 0:
-                    Player.getElementByID("line_icon_"+str(i+1)).opacity = 0.3
-                else:
-                    Player.getElementByID("line_icon_"+str(i+1)).opacity = 0.1
+#    def __setDataLineStatus(self):
+#        if self.__bConnected:
+#            self.ParPort.setControlLine(avg.CONTROL_STROBE, 0)
+#            Log.trace(Log.APP, str(self.__DataLineStatus))
+#            self.ParPort.setAllDataLines(self.__DataLineStatus)
+#            self.ParPort.setControlLine(avg.CONTROL_STROBE, 1)
+#            time.sleep(0.001)
+#            self.ParPort.setControlLine(avg.CONTROL_STROBE, 0)
+#        for i in range(8):
+#            icon = Player.getElementByID("line_icon_"+str(i+1))
+#            if icon:
+#                if (self.__DataLineStatus & 2**i) != 0:
+#                    Player.getElementByID("line_icon_"+str(i+1)).opacity = 0.3
+#                else:
+#                    Player.getElementByID("line_icon_"+str(i+1)).opacity = 0.1
+#	Log.trace(Log.APP, "Data lines: "+str(self.__DataLineStatus));
     def __lineToIndex(self, line):
         if line == avg.PARPORTDATA0:
             return 1
@@ -75,6 +77,7 @@ class BodyScanner:
         else:
             return 0
     def __setDataLine(self, line, value):
+        self.ParPort.setControlLine(avg.CONTROL_STROBE, 0)
         icon = Player.getElementByID("line_icon_"+str(self.__lineToIndex(line)))
         if value:
             self.ParPort.setDataLines(line)
@@ -86,7 +89,10 @@ class BodyScanner:
             if icon:
                 icon.opacity = 0.1
             self.__DataLineStatus &= not(line)
-        self.__setDataLineStatus()
+        self.ParPort.setControlLine(avg.CONTROL_STROBE, 1)
+        time.sleep(0.001)
+        self.ParPort.setControlLine(avg.CONTROL_STROBE, 0)
+#        self.__setDataLineStatus()
     def __init__(self):
         self.ParPort = avg.ParPort()
         self.ParPort.init("")
@@ -146,7 +152,7 @@ class BodyScanner:
                 return bNewerValue
             else:
                 return bLastValue
-        bMotorDir = safeGetSignal(self.bMotorDir, avg.STATUS_ACK)
+        bMotorDir = not(safeGetSignal(self.bMotorDir, avg.STATUS_ACK))
         bMotorOn = safeGetSignal(self.bMotorOn, avg.STATUS_BUSY)
         if bMotorOn != self.bMotorOn:
             if bMotorOn:
@@ -155,18 +161,20 @@ class BodyScanner:
                 Log.trace(Log.APP, "Body scanner motor off signal.")
         if bMotorDir != self.bMotorDir:
             if bMotorDir:
-                Log.trace(Log.APP, "Body scanner moving up signal.")
-            else:
                 Log.trace(Log.APP, "Body scanner moving down signal.")
+            else:
+                Log.trace(Log.APP, "Body scanner moving up signal.")
         if bMotorDir != self.bMotorDir or bMotorOn != self.bMotorOn:
             if not(bMotorOn):
                 Log.trace(Log.APP, "    --> Motor is off.")
             else:
                 if bMotorDir:
-                    Log.trace(Log.APP, "    -> Moving up.")
-                else:
                     Log.trace(Log.APP, "    -> Moving down.")
-        self.bMotorOn = bMotorOn
+                else:
+                    Log.trace(Log.APP, "    -> Moving up.")
+        if not(self.bMotorDir) and bMotorDir:
+            self.__setDataLine(avg.PARPORTDATA0, 0)
+	self.bMotorOn = bMotorOn
         self.bMotorDir = bMotorDir
         if self.__isScanning and not(self.bMotorOn):
             self.powerOff()
@@ -179,13 +187,13 @@ class BodyScanner:
         else:
             Player.getElementByID("warn_icon_2").opacity=0.1;
     def isUserInRoom(self):
-        # (ParPort.SELECT == true) == weisses Kabel == Benutzer in Schleuse
+        # (ParPort.SELECT == true) == weißes Kabel == Benutzer in Schleuse
         return self.__bConnected or not(self.ParPort.getStatusLine(avg.STATUS_SELECT))
     def isUserInFrontOfScanner(self):
         return 0 
 #        return self.__bConnected and not(self.ParPort.getStatusLine(avg.STATUS_ERROR))
     def isMovingDown(self):
-        return not(self.bMotorDir) and self.bMotorOn
+        return self.bMotorDir and self.bMotorOn
 #    def isScannerAtBottom(self):
 #        return self.__bConnected and ParPort.getStatusLine(avg.STATUS_BUSY)
     def isScannerConnected(self):
@@ -727,7 +735,7 @@ class KoerperscanMover:
                   "> Gliedmaße",
                   "Topologie",
                   "Scelettaufbau",
-                  "> WirbelsÃ¤ule",
+                  "> Wirbelsäule",
                   "Organe und Innereien"],
                   "grundton.wav"),
             TextElement("zellen", "zellen", "rahmen_5x4",
@@ -769,7 +777,7 @@ class KoerperscanMover:
             if self.CurFrame == 20*30:
                 __done()
         else:
-            if self.CurFrame == 8*30:
+            if self.CurFrame == 10*30:
                 __done()
         self.CurFrame += 1
 
@@ -802,7 +810,7 @@ class FremdkoerperMover:
             self.__Icon=Player.getElementByID("flugzeug")
             self.__Region.x=90
             self.__Region.y=300
-            self.__Text.text="Bitte begeben sie sich in den Bereich Social Construction auf Ebene -1."
+            self.__Text.text="Bitte begeben sie sich in den bereich social engineering."
             self.__StopFrame=50
         elif WhichFremdkoerper==1:
             self.__Icon=Player.getElementByID("implantat")
