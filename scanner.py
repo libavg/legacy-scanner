@@ -10,7 +10,7 @@
 # - Rotator bewegen.
 # - Stromspar-Strategie
 import sys, os, math, random, subprocess, signal, atexit
-sys.path.append('/usr/local/lib/python2.4/site-packages/avg')
+sys.path.append('/usr/local/lib/python2.4/site-packages/libavg')
 import avg
 import anim
 import time
@@ -1003,7 +1003,8 @@ CurrentMover = UnbenutztMover()
 CurrentMover.onStart()
 
 try:
-    Player.play(30)
+    Player.setFramerate(25)
+    Player.play()
     Scanner.delete()
 finally:
     cleanup()
