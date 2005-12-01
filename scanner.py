@@ -1003,7 +1003,7 @@ CurrentMover = UnbenutztMover()
 CurrentMover.onStart()
 
 try:
-    Player.setFramerate(25)
+    Player.setVBlankFramerate(2)
     Player.play()
     Scanner.delete()
 finally:
