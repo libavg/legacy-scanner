@@ -474,7 +474,7 @@ class Unbenutzt_AufforderungMover:
     def onStop(self, NewMover): 
         for i in range(12):
             if (i != 0 and i != 6): 
-                anim.fadeOut(Player, "idle"+str(i), 300)
+                anim.fadeOut(Player.getElementByID("idle"+str(i)), 300)
   
 
 class AufforderungMover:
@@ -505,10 +505,10 @@ class AufforderungMover:
 
     def onStop(self, NewMover):
         Player.clearInterval(self.StopTimeoutID)
-        anim.fadeOut(Player, "aufforderung_bottom", 300)
-        anim.fadeOut(Player, "aufforderung_top", 300)
-        anim.fadeOut(Player, "idle0", 3000)
-        anim.fadeOut(Player, "idle6", 3000)
+        anim.fadeOut(Player.getElementByID("aufforderung_bottom"), 300)
+        anim.fadeOut(Player.getElementByID("aufforderung_top"), 300)
+        anim.fadeOut(Player.getElementByID("idle0"), 3000)
+        anim.fadeOut(Player.getElementByID("idle6"), 3000)
 
 
 class HandscanMover:
@@ -549,10 +549,11 @@ class HandscanMover:
         self.ScanningBottomNode = Player.getElementByID("scanning_bottom")
 
     def onStart(self): 
-        anim.animateAttr(Player, "warten", "x", 178, 620, 600)
-        anim.animateAttr(Player, "warten", "y", 241, 10, 600)
+        warten = Player.getElementByID("warten")
+        anim.LinearAnim(warten, "x", 600, 178, 620, 0, None)
+        anim.LinearAnim(warten, "y", 600, 241, 10, 0, None)
         for i in range(12):
-            anim.fadeOut(Player, "idle"+str(i), 200)
+            anim.fadeOut(Player.getElementByID("idle"+str(i)), 200)
         self.ScanningBottomNode.y = 600
         MessageArea.calcTextPositions(self.TextElements, "CDF1C8", "FFFFFF")
     
@@ -575,13 +576,13 @@ class HandscanMover:
                     node.angle = 0
                     self.bRotateInnen = 0
             if (not self.bRotateInnen and not self.bRotateAussen):
-                anim.fadeOut(Player, "warten", 400)
+                anim.fadeOut(Player.getElementByID("warten"), 400)
                 node = Player.getElementByID("line1")
                 node.text="scanning"
                 node.weight="bold"
-                anim.fadeIn(Player, "line1", 1000, 1.0)
+                anim.fadeIn(node, 1000, 1.0)
                 Player.getElementByID("line1").font="Eurostile"
-                anim.fadeIn(Player, "balken_ueberschriften", 300, 1.0)
+                anim.fadeIn(Player.getElementByID("balken_ueberschriften"), 300, 1.0)
                 self.Phase = self.SCANNING
         elif (self.Phase == self.SCANNING):    
             self.ScanFrames += 1
@@ -595,20 +596,20 @@ class HandscanMover:
             if (self.ScanFrames == 1):
                 Player.getElementByID("start_scan_aufblitzen").opacity=1.0
                 playSound("bioscan.wav")
-                anim.fadeIn(Player, "scanning_bottom", 200, 1.0)
-                anim.fadeIn(Player, "auflage_lila", 200, 1.0)
+                anim.fadeIn(Player.getElementByID("scanning_bottom"), 200, 1.0)
+                anim.fadeIn(Player.getElementByID("auflage_lila"), 200, 1.0)
                 Player.getElementByID("handscan_balken_links").play()
                 Player.getElementByID("handscan_balken_rechts").play()
-                anim.fadeOut(Player, "auflage_background", 200)
+                anim.fadeOut(Player.getElementByID("auflage_background"), 200)
             elif (self.ScanFrames == 6):
-                anim.fadeOut(Player, "start_scan_aufblitzen", 100)
+                anim.fadeOut(Player.getElementByID("start_scan_aufblitzen"), 100)
                 node = Player.getElementByID("handscanvideo")
                 node.opacity=1.0
                 node.play()
             elif (self.ScanFrames == 72):
                 node = Player.getElementByID("handscanvideo")
                 node.stop()
-                anim.fadeOut(Player, "handscanvideo", 600)
+                anim.fadeOut(Player.getElementByID("handscanvideo"), 600)
             elif (self.ScanFrames == 240):
                 changeMover(KoerperscanMover())
 #                if (random.random() > 0.2): 
@@ -624,14 +625,14 @@ class HandscanMover:
         node = Player.getElementByID("handscanvideo")
         node.stop()
         node.opacity = 0
-        anim.fadeOut(Player, "line1", 300)
+        anim.fadeOut(Player.getElementByID("line1"), 300)
         Player.setTimeout(300, setLine1Font) 
-        anim.fadeOut(Player, "balken_ueberschriften", 300)
-        anim.fadeOut(Player, "warten", 300)
+        anim.fadeOut(Player.getElementByID("balken_ueberschriften"), 300)
+        anim.fadeOut(Player.getElementByID("warten"), 300)
         Player.getElementByID("scanning_bottom").opacity=0
         Player.getElementByID("handscan_balken_links").stop()
         Player.getElementByID("handscan_balken_rechts").stop()
-        anim.fadeOut(Player, "auflage_lila", 300)
+        anim.fadeOut(Player.getElementByID("auflage_lila"), 300)
         MessageArea.clear()
         Player.getElementByID("start_scan_aufblitzen").opacity = 0
         Player.getElementByID("balken_ueberschriften").opacity = 0
@@ -651,13 +652,17 @@ class HandscanErkanntMover:
                 changeMover(WeitergehenMover())
             else:
                 changeMover(UnbenutztMover())
-        anim.fadeIn(Player, "willkommen_text", 500, 1)
-        anim.fadeIn(Player, "green_screen", 500, 1)
-        anim.animateAttr(Player, "willkommen_text", "x", 607, 73, 1000)
-        anim.animateAttr(Player, "willkommen_text", "y", 675, 81, 1000)
-        anim.animateAttr(Player, "willkommen_text", "width", 330, 874, 1000)
-        anim.animateAttr(Player, "willkommen_text", "height", 13, 37, 1000)
-        anim.fadeIn(Player, "auflage_gruen", 500, 1)
+        anim.fadeIn(Player.getElementByID("willkommen_text"), 500, 1)
+        anim.fadeIn(Player.getElementByID("green_screen"), 500, 1)
+        anim.LinearAnim(Player.getElementByID("willkommen_text"), "x", 
+                1000, 607, 73, 0, None)
+        anim.LinearAnim(Player.getElementByID("willkommen_text"), "y", 
+                1000, 675, 81, 0, None)
+        anim.LinearAnim(Player.getElementByID("willkommen_text"), "width",
+                1000, 330, 874, 0, None)
+        anim.LinearAnim(Player.getElementByID("willkommen_text"), "height",
+                1000, 13, 37, 0, None)
+        anim.fadeIn(Player.getElementByID("auflage_gruen"), 500, 1)
         playSound("willkomm.wav")
         self.StopTimeoutID = Player.setTimeout(4000, 
                 newMover)
@@ -668,9 +673,9 @@ class HandscanErkanntMover:
 
     def onStop(self, NewMover):
         Player.clearInterval(self.StopTimeoutID)
-        anim.fadeOut(Player, "willkommen_text", 500)
-        anim.fadeOut(Player, "green_screen", 500)
-        anim.fadeOut(Player, "auflage_gruen", 500)
+        anim.fadeOut(Player.getElementByID("willkommen_text"), 500)
+        anim.fadeOut(Player.getElementByID("green_screen"), 500)
+        anim.fadeOut(Player.getElementByID("auflage_gruen"), 500)
 
 
 class HandscanAbgebrochenMover:
@@ -1004,6 +1009,7 @@ CurrentMover.onStart()
 
 try:
     Player.setVBlankFramerate(2)
+    anim.init(Player)
     Player.play()
     Scanner.delete()
 finally:
