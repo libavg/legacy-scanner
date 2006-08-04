@@ -9,11 +9,16 @@
 # Later:
 # - Rotator bewegen.
 # - Stromspar-Strategie
-import sys, os, math, random, subprocess, signal, atexit
+import sys, os, math, random, signal, atexit
 sys.path.append('/usr/local/lib/python2.4/site-packages/libavg')
 import avg
 import anim
 import time
+
+try:
+    import subprocess
+except:
+    subprocess = False
 
 def playSound(Filename):
     bException = 0
@@ -393,12 +398,14 @@ class LeerMover:
     def onStart(self):
         ConradRelais.setAmbientLight(0)
         ConradRelais.setScannerAmbientLight(0)
-        subprocess.call(["xset", "dpms", "force", "suspend"])
+        if subprocess:
+            subprocess.call(["xset", "dpms", "force", "suspend"])
     def onFrame(self):
         pass
     def onStop(self, NewMover):
         ConradRelais.setAmbientLight(1)
-        subprocess.call(["xset", "dpms", "force", "on"])
+        if subprocess:
+            subprocess.call(["xset", "dpms", "force", "on"])
 
 class UnbenutztMover:
     def __init__(self):
@@ -971,7 +978,7 @@ if (bDebug):
 else:
     Player.setResolution(1, 0, 0, 0)
     Player.showCursor(0)
-    Log.setDestination("/var/log/cleuse.log")
+    Log.setFileDest("/var/log/cleuse.log")
     Log.setCategories(Log.APP |
                       Log.WARNING | 
                       Log.PROFILE |
