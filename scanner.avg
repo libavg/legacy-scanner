@@ -3,25 +3,25 @@
 <avg width="1024" height="1536" onkeyup="onKeyUp"
       onmousedown="onMouseDown" onmouseup="onMouseUp">
   <div id="topscreen" x="0" y="0">
-    <div id="top_background" x="0" y="0" z="1">
-      <image x="0" y="0" z="0" href="medien/screen_background.tif"/>
-      <words x="797" y="736" z="1" size="28" font="ceva"
+    <div id="top_background" x="0" y="0">
+      <image x="0" y="0" href="medien/screen_background.tif"/>
+      <words x="797" y="736" size="28" font="ceva"
           color="8E8E8E" text="genotype"/>
-      <words x="903" y="736" z="1" size="28" font="ceva"
+      <words x="903" y="736" size="28" font="ceva"
           text="explorer"/>
     </div>
-    <div id="warten" x="178" y="241" z="4">
-      <image id="warten_aussen" x="0" y="0" z="1" 
+    <div id="warten" x="178" y="241">
+      <image id="warten_aussen" x="0" y="0" 
           href="medien/warten_aussen.tif"/>
-      <image id="warten_innen" x="32" y="31" z="1" 
+      <image id="warten_innen" x="32" y="31" 
           href="medien/warten_innen.tif"/>
     </div>
-    <div id="aufforderung_top" z="1" opacity="0">
+    <div id="aufforderung_top" opacity="0">
 <!--      <image id="aufforderung_icon" x="455" y="279"
           href="medien/02_aufforderung_handscan/scan_icon.tif"/>
 -->          
     </div>
-    <div id="screens" x="36" y="58" z="0" opacity="1">
+    <div id="screens" x="36" y="58" opacity="1">
         <image id="start_scan_aufblitzen" opacity="0"
             href="medien/03_handscan/start_scan_aufblitzen.tif"/>
         <image id="hand0" href="medien/03_handscan/hand0.tif" opacity="0"/>
@@ -40,16 +40,16 @@
         <image id="hand13" href="medien/03_handscan/hand13.tif" opacity="0"/>
         <image id="hand14" href="medien/03_handscan/hand14.tif" opacity="0"/>
         <video id="handscanvideo" href="medien/03_handscan/hand_pulse.mpg" 
-                z="2" opacity="0"/>
+                opacity="0"/>
         <image id="green_screen" opacity="0" width="480" height="640"
                 href="medien/05_handscan_erkannt/green_screen.tif"/>
         <video id="koerperscan" href="medien/07_koerperscan/bodyscan.mp4"
-                x="-80" y="80" z="2" opacity="0" angle="1.57075"/>
+                x="-80" y="80" opacity="0" angle="1.57075"/>
         <video id="koerperscan_rueckwaerts" href="medien/10_fremdkoerper/bodyscan_backwards_150.mov"
-                x="-80" y="80" z="2" opacity="0" angle="1.57075"/>
-        <image id="fremdkoerper_region" z="3" opacity="0" href="medien/10_fremdkoerper/region.tif"/>
+                x="-80" y="80" opacity="0" angle="1.57075"/>
+        <image id="fremdkoerper_region" opacity="0" href="medien/10_fremdkoerper/region.tif"/>
     </div>
-    <div id="fremdkoerper" x="487" y="164" z="5" opacity="1">
+    <div id="fremdkoerper" x="487" y="164" opacity="1">
         <image id="overlay" x="0" y="0" opacity="0"
                 href="medien/10_fremdkoerper/overlay.png"/>
         <image id="overlay_streifen" x="0" y="33" opacity="0"
@@ -69,11 +69,11 @@
                 text="Bionisches Implantat entdeckt-----------------------------"/>
     </div>
     <image id="willkommen_text" x="607" y="675" width="330" height="13"
-        z="3" opacity="0"
+        opacity="0"
         href="medien/05_handscan_erkannt/willkommen.tif"/>
-    <image id="balken_ueberschriften" x="514" y="77" z="2" opacity="0"
+    <image id="balken_ueberschriften" x="514" y="77" opacity="0"
         href="medien/balken_ueberschriften.tif"/>
-    <div id="top_textlines" x="671" y="78" z="3" opacity="1">
+    <div id="top_textlines" x="671" y="78" opacity="1">
         <words id="line0" x="0" y="0" size="18" font="Arial"
             text=""/>
         <words id="line1" x="0" y="21" size="18" font="Arial"
@@ -135,42 +135,42 @@
         <words id="line29" x="0" y="609" size="18" font="Arial"
             text=""/>
     </div>
-    <div id="data_icons" x="541" y="78" z="4">
-      <image id="reiter5" x="85" opacity="0" z="0" href="medien/reiter5.tif"/>
-      <image id="reiter6" x="85" opacity="0" z="0" href="medien/reiter6.tif"/>
-      <image id="reiter7" x="85" opacity="0" z="0" href="medien/reiter7.tif"/>
-      <image id="reiter5_weiss" x="85" opacity="0" z="1" href="medien/reiter5_weiss.tif"/>
-      <image id="reiter6_weiss" x="85" opacity="0" z="1" href="medien/reiter6_weiss.tif"/>
-      <image id="reiter7_weiss" x="85" opacity="0" z="1" href="medien/reiter7_weiss.tif"/>
-      <image id="molekuel" x="0" y="0" opacity="0" z="4"
+    <div id="data_icons" x="541" y="78">
+      <image id="reiter5" x="85" opacity="0" href="medien/reiter5.tif"/>
+      <image id="reiter6" x="85" opacity="0" href="medien/reiter6.tif"/>
+      <image id="reiter7" x="85" opacity="0" href="medien/reiter7.tif"/>
+      <image id="reiter5_weiss" x="85" opacity="0" href="medien/reiter5_weiss.tif"/>
+      <image id="reiter6_weiss" x="85" opacity="0" href="medien/reiter6_weiss.tif"/>
+      <image id="reiter7_weiss" x="85" opacity="0" href="medien/reiter7_weiss.tif"/>
+      <image id="rahmen_3x5" x="46" opacity="0" href="medien/rahmen_3x5.tif"/>
+      <image id="rahmen_5x3" x="0" opacity="0" href="medien/rahmen_5x3.tif"/>
+      <image id="rahmen_5x4" x="0" opacity="0" href="medien/rahmen_5x4.tif"/>
+      <image id="rahmen_4x4" x="33" opacity="0" href="medien/rahmen_4x4.tif"/>
+      <image id="molekuel" x="0" y="0" opacity="0"
           href="medien/03_handscan/molekuel.tif"/>
-      <image id="helix" x="46" y="0" opacity="0" z="4"
+      <image id="helix" x="46" y="0" opacity="0"
           href="medien/03_handscan/helix.tif"/>
-      <image id="welt" x="" opacity="0" z="4" href="medien/03_handscan/welt.tif"/>
-      <image id="grundtonus" x="54" opacity="0" z="4"
+      <image id="welt" x="" opacity="0" href="medien/03_handscan/welt.tif"/>
+      <image id="grundtonus" x="54" opacity="0"
           href="medien/07_koerperscan/grundtonus.tif"/>
-      <image id="zellen" x="0" opacity="0" z="4" href="medien/07_koerperscan/zellen.tif"/>
-      <video id="gehirn" x="36" opacity="0" z="4" 
+      <image id="zellen" x="0" opacity="0" href="medien/07_koerperscan/zellen.tif"/>
+      <video id="gehirn" x="36" opacity="0" 
           href="medien/07_koerperscan/gehirnscan.mov"/>
-      <image id="nervensystem" x="0" opacity="0" z="4" 
+      <image id="nervensystem" x="0" opacity="0" 
           href="medien/07_koerperscan/nervensystem.tif"/>
-      <image id="viren" x="0" opacity="0" z="4" href="medien/07_koerperscan/viren.tif"/>
+      <image id="viren" x="0" opacity="0" href="medien/07_koerperscan/viren.tif"/>
     
       
-      <image id="rahmen_3x5" x="46" opacity="0" z="3" href="medien/rahmen_3x5.tif"/>
-      <image id="rahmen_5x3" x="0" opacity="0" z="3" href="medien/rahmen_5x3.tif"/>
-      <image id="rahmen_5x4" x="0" opacity="0" z="3" href="medien/rahmen_5x4.tif"/>
-      <image id="rahmen_4x4" x="33" opacity="0" z="3" href="medien/rahmen_4x4.tif"/>
     </div>
   </div>
   <div id="auflage" x="0" y="768">
-    <image id="auflage_background" x="0" y="0" z="0" 
+    <image id="auflage_background" x="0" y="0" 
             href="medien/auflage_background.tif"/>
-    <words x="797" y="10" z="4" size="28" font="ceva"
+    <words x="797" y="10" size="28" font="ceva"
         color="8E8E8E" text="genotype"/>
-    <words x="903" y="10" z="4" size="28" font="ceva"
+    <words x="903" y="10" size="28" font="ceva"
         text="explorer"/>
-    <div id="idle" x="0" y="0" z="2">
+    <div id="idle" x="0" y="0">
       <image id="idle0" x="457" y="484" angle="0"
           href="medien/pfeil.tif"/>
       <image id="idle1" x="457" y="484" pivotx="55" pivoty="-100"
@@ -196,25 +196,25 @@
       <image id="idle11" x="457" y="484" pivotx="55" pivoty="-100"
           angle="5.75959" href="medien/pfeil.tif"/>
     </div>
-    <div id="aufforderung_bottom" x="72" y="333" z="2" opacity="0">
+    <div id="aufforderung_bottom" x="72" y="333" opacity="0">
       <image href="medien/02_aufforderung_handscan/lila_hintergrund.tif"/>
-      <words x="80" y="30" z="1" size="24" font="Eurostile" weight="bold"
+      <words x="80" y="30" size="24" font="Eurostile" weight="bold"
           text="bitte identifizieren sie sich am scannermodul"/>
         
     </div>
-    <div id="scanning_bottom" y="600" z="2" opacity="0">
+    <div id="scanning_bottom" y="600" opacity="0">
       <video id="handscan_balken_links" x="0" y="0" loop="true" 
           href="medien/03_handscan/scanbalken.mpg"/>
       <video id="handscan_balken_rechts" x="720" y="0" loop="true"
           href="medien/03_handscan/scanbalken.mpg"/>
     </div>
-    <div id="pulse_bottom" x="238" y="18" z="3"> 
+    <div id="pulse_bottom" x="238" y="18"> 
       <image id="auflage_lila" opacity="0"
           href="medien/03_handscan/auflage_lila.tif"/>
       <image id="auflage_gruen" opacity="0"
           href="medien/05_handscan_erkannt/auflage_gruen.tif"/>
     </div>
-    <div id="status_icons" x="780" y="600" z="5">
+    <div id="status_icons" x="780" y="600">
       <image id="line_icon_1" x="0" y="0" width="15" height="16" opacity="0.1" href="medien/warn_icon.tif"/>
       <image id="line_icon_2" x="15" y="0" width="15" height="16" opacity="0.1" href="medien/warn_icon.tif"/>
       <image id="line_icon_3" x="31" y="0" width="15" height="16" opacity="0.1" href="medien/warn_icon.tif"/>

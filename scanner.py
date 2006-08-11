@@ -10,7 +10,6 @@
 # - Rotator bewegen.
 # - Stromspar-Strategie
 import sys, os, math, random, signal, atexit
-sys.path.append('/usr/local/lib/python2.4/site-packages/libavg')
 import avg
 import anim
 import time
