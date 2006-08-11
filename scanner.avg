@@ -49,25 +49,6 @@
                 x="-80" y="80" opacity="0" angle="1.57075"/>
         <image id="fremdkoerper_region" opacity="0" href="medien/10_fremdkoerper/region.tif"/>
     </div>
-    <div id="fremdkoerper" x="487" y="164" opacity="1">
-        <image id="overlay" x="0" y="0" opacity="0"
-                href="medien/10_fremdkoerper/overlay.png"/>
-        <image id="overlay_streifen" x="0" y="33" opacity="0"
-                href="medien/10_fremdkoerper/overlay_streifen.tif"/>
-        <image id="achtung" x="19" y="23" opacity="0"
-                href="medien/10_fremdkoerper/achtung.tif"/>
-        <image id="implantat" x="19" y="114" opacity="0" 
-                href="medien/10_fremdkoerper/icon_implantat.tif"/>
-        <image id="flugzeug" x="19" y="114" opacity="0" 
-                href="medien/10_fremdkoerper/icon_flugzeug.tif"/>
-        <image id="mate" x="19" y="114" opacity="0" 
-                href="medien/10_fremdkoerper/icon_mate.tif"/>
-        <words id="fremdkoerper_titel" x="146" y="30" width="250" parawidth="220" opacity="0"
-                font="Eurostile" size="18" linespacing="-5" text="fremdcörper identifiziert"/>
-        <words id="fremdkoerper_text" x="146" y="103" linespacing="3" width="250" 
-                parawidth="220" opacity="0"
-                text="Bionisches Implantat entdeckt-----------------------------"/>
-    </div>
     <image id="willkommen_text" x="607" y="675" width="330" height="13"
         opacity="0"
         href="medien/05_handscan_erkannt/willkommen.tif"/>
@@ -159,8 +140,25 @@
       <image id="nervensystem" x="0" opacity="0" 
           href="medien/07_koerperscan/nervensystem.tif"/>
       <image id="viren" x="0" opacity="0" href="medien/07_koerperscan/viren.tif"/>
-    
-      
+    </div>
+    <div id="fremdkoerper" x="487" y="164" opacity="1">
+        <image id="overlay" x="0" y="0" opacity="0"
+                href="medien/10_fremdkoerper/overlay.png"/>
+        <image id="overlay_streifen" x="0" y="33" opacity="0"
+                href="medien/10_fremdkoerper/overlay_streifen.tif"/>
+        <image id="achtung" x="19" y="23" opacity="0"
+                href="medien/10_fremdkoerper/achtung.tif"/>
+        <image id="implantat" x="19" y="114" opacity="0" 
+                href="medien/10_fremdkoerper/icon_implantat.tif"/>
+        <image id="flugzeug" x="19" y="114" opacity="0" 
+                href="medien/10_fremdkoerper/icon_flugzeug.tif"/>
+        <image id="mate" x="19" y="114" opacity="0" 
+                href="medien/10_fremdkoerper/icon_mate.tif"/>
+        <words id="fremdkoerper_titel" x="146" y="30" width="250" parawidth="220" opacity="0"
+                font="Eurostile" size="18" linespacing="-5" text="fremdcörper identifiziert"/>
+        <words id="fremdkoerper_text" x="146" y="103" linespacing="3" width="250" 
+                parawidth="220" opacity="0"
+                text="Bionisches Implantat entdeckt-----------------------------"/>
     </div>
   </div>
   <div id="auflage" x="0" y="768">
