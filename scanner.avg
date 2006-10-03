@@ -164,10 +164,6 @@
   <div id="auflage" x="0" y="768">
     <image id="auflage_background" x="0" y="0" 
             href="medien/auflage_background.tif"/>
-    <words x="797" y="10" size="28" font="ceva"
-        color="8E8E8E" text="genotype"/>
-    <words x="903" y="10" size="28" font="ceva"
-        text="explorer"/>
     <div id="idle" x="0" y="0">
       <image id="idle0" x="457" y="484" angle="0"
           href="medien/pfeil.tif"/>
@@ -225,5 +221,9 @@
       <image id="warn_icon_1" x="0" y="50" opacity="1" href="medien/warn_icon.tif"/>
       <image id="warn_icon_2" x="70" y="50" opacity="1" href="medien/warn_icon_orange.tif"/>
     </div>
+    <words x="797" y="10" size="28" font="ceva"
+        color="8E8E8E" text="genotype"/>
+    <words x="903" y="10" size="28" font="ceva"
+        text="explorer"/>
   </div>
 </avg>
