@@ -10,8 +10,8 @@
 # - Rotator bewegen.
 # - Stromspar-Strategie
 import sys, os, math, random, signal, atexit
-import avg
-import anim
+from libavg import avg
+from libavg import anim
 import time
 
 try:
