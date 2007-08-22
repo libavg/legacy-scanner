@@ -297,7 +297,7 @@ class MessageArea:
                     Img = Player.getElementByID(Image[i+1])
                     if not(Img == None):
                         Img.opacity = 0
-                    if type(Img) == type(avg.Video()):
+                    if type(Img) == type(Player.getElementByID("koerperscan")):
                         Img.stop()
         for ID in ["reiter5", "reiter6", "reiter7",
                 "reiter5_weiss", "reiter6_weiss", "reiter7_weiss"]:
@@ -315,7 +315,7 @@ class MessageArea:
                     else:
                         Image.y = Player.getElementByID("line"+str(Line+1)).y
                     Image.opacity = 1
-                    if type(Image) == type(avg.Video()):
+                    if type(Image) == type(Player.getElementByID("koerperscan")):
                         Image.y += 2
                         Image.play()
                         Player.setTimeout(10, lambda: Image.pause())
@@ -345,7 +345,7 @@ class MessageArea:
                     curReiterID = "reiter"+str(numLines+1)+"_weiss"
                     showImage(self.__ImageIDs[self.__CurImage][0], curReiterID, 2)
                     Image = Player.getElementByID(self.__ImageIDs[self.__CurImage][2])
-                    if type(Image) == type(avg.Video()):
+                    if type(Image) == type(Player.getElementByID("koerperscan")):
                         Image.play()
                     self.__CurImage+=1
                     if ImageID[3] != "":
@@ -915,15 +915,14 @@ def onFrame():
     if Status == LEER and time.time()-LastMovementTime < EMPTY_TIMEOUT:
         changeMover(UnbenutztMover())
 
-def onKeyUp():
+def onKeyUp(Event):
     global LastMovementTime
     LastMovementTime = time.time()
-    Event= Player.getCurEvent()
     if Event.keystring == "1":
         if Status == LEER:
             changeMover(UnbenutztMover())
 
-def onMouseDown():
+def onMouseDown(Event):
     global LastMovementTime
     LastMovementTime = time.time()
     global bMouseDown
@@ -933,7 +932,7 @@ def onMouseDown():
     if Status in [UNBENUTZT, UNBENUTZT_AUFFORDERUNG, AUFFORDERUNG]:
         changeMover(HandscanMover())
 
-def onMouseUp():
+def onMouseUp(Event):
     global LastMovementTime
     LastMovementTime = time.time()
     global bMouseDown
